@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -6,44 +7,85 @@ import {
   RouterProvider,
   Outlet,
 } from 'react-router-dom'
-import { Tooltip } from 'flowbite-react'
-import logo from './logo.svg'
+import { Button, Card, Label, TextInput, Tooltip } from 'flowbite-react'
 import './App.css'
 
-function Main() {
+interface MainProps {
+  seed?: string 
+}
+function Main({ seed }: MainProps) {
+  if (!seed) {
+    return <Navigate to="/login" replace={true} />
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p className="text-3xl font-bold underline">
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        
-        <Tooltip content="Tooltip content">
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </Tooltip>
-      </header>
+    <div className="text-3xl">
+      { seed }
+    </div>
+  )
+}
+
+interface LoginProps {
+  onSubmit: (seed: string) => void
+}
+function Login({ onSubmit }: LoginProps) {
+  const [seedInput, setSeedInput] = useState('')
+
+  return (
+    <div className="text-3xl">
+      <Card>
+        <div className="mb-2 block">
+          Welcome
+        </div>
+        <div className="hidden">
+          <Label
+            htmlFor="lnpass1"
+            value="lnpass1"
+          />
+        </div>
+        <div className="flex flex-row gap-2 items-center">
+          <div className="flex-1">
+            <TextInput
+              id="lnpass1"
+              type="text"
+              sizing="lg"
+              value={seedInput}
+              onChange={(e) => setSeedInput(e.target.value)}
+            />
+          </div>
+          <div className="flex-none h-full">
+            <Tooltip content="Let's go!">
+              <Button
+                outline={true}
+                gradientDuoTone="purpleToBlue"
+                size="xl"
+                onClick={() => onSubmit(seedInput)}
+              >
+                <div className="text-xl">&gt;</div>
+              </Button>
+            </Tooltip>
+          </div>
+        </div>
+      </Card>
     </div>
   )
 }
 
 function App() {
+  const [seed, setSeed] = useState<string>()
+
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route
         id="base"
-        element={<>
+        element={<div className="p-2">
           <Outlet />
-        </>}
+        </div>}
       >
-        <Route id="home" path="/" index element={<Main />} />
+        <Route id="home" path="/" index element={<Main seed={seed}/>} />
+        <Route id="login" path="/login" index element={seed ? <Navigate to="/" replace={true} /> : <Login onSubmit={(seed) => {
+          setSeed(seed)
+        }}/>} />
         <Route id="404" path="*" element={<Navigate to="/" replace={true} />} />
       </Route>
     )
