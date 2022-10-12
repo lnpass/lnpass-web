@@ -19,7 +19,7 @@ function Main({ seed, logout }: MainProps) {
     return <Navigate to="/login" replace={true} />
   }
 
-  return (<>
+  return (<div className="p-2">
       <div className="text-3xl">
         { seed }
       </div>
@@ -34,7 +34,7 @@ function Main({ seed, logout }: MainProps) {
           Logout
         </Button>
       </Tooltip>
-    </>
+    </div>
   )
 }
 
@@ -45,41 +45,43 @@ function Login({ onSubmit }: LoginProps) {
   const [seedInput, setSeedInput] = useState('')
 
   return (
-    <div className="text-3xl">
-      <Card>
-        <div className="mb-2 block">
-          Welcome
-        </div>
-        <div className="hidden">
-          <Label
-            htmlFor="lnpass1"
-            value="lnpass1"
-          />
-        </div>
-        <div className="flex flex-row gap-2 items-center">
-          <div className="flex-1">
-            <TextInput
-              id="lnpass1"
-              type="text"
-              sizing="lg"
-              value={seedInput}
-              onChange={(e) => setSeedInput(e.target.value)}
+    <div className="flex h-screen justify-center items-center text-3xl">
+      <div className="w-full max-w-7xl">
+        <Card>
+          <div className="mb-2 block">
+            Welcome
+          </div>
+          <div className="hidden">
+            <Label
+              htmlFor="lnpass1"
+              value="lnpass1"
             />
           </div>
-          <div className="flex-none h-full">
-            <Tooltip content="Let's go!">
-              <Button
-                outline={true}
-                gradientDuoTone="purpleToBlue"
-                size="xl"
-                onClick={() => onSubmit(seedInput)}
-              >
-                <div className="text-xl">&gt;</div>
-              </Button>
-            </Tooltip>
+          <div className="flex flex-row gap-2 items-center">
+            <div className="flex-1">
+              <TextInput
+                id="lnpass1"
+                type="text"
+                sizing="lg"
+                value={seedInput}
+                onChange={(e) => setSeedInput(e.target.value)}
+              />
+            </div>
+            <div className="flex-none h-full">
+              <Tooltip content="Let's go!">
+                <Button
+                  outline={true}
+                  gradientDuoTone="purpleToBlue"
+                  size="xl"
+                  onClick={() => onSubmit(seedInput)}
+                >
+                  <div className="text-xl">&gt;</div>
+                </Button>
+              </Tooltip>
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </div>
     </div>
   )
 }
@@ -91,7 +93,7 @@ function App() {
     createRoutesFromElements(
       <Route
         id="base"
-        element={<div className="p-2">
+        element={<div>
           <Outlet />
         </div>}
       >
