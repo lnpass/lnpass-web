@@ -1,6 +1,7 @@
-import logo from './logo.svg';
-import './App.css';
+
 import { Tooltip } from 'flowbite-react'
+import logo from './logo.svg'
+import './App.css'
 
 function App() {
   return (
@@ -23,7 +24,7 @@ function App() {
         </Tooltip>
       </header>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
