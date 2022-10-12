@@ -1,9 +1,16 @@
-
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Navigate,
+  Route,
+  RouterProvider,
+  Outlet,
+} from 'react-router-dom'
 import { Tooltip } from 'flowbite-react'
 import logo from './logo.svg'
 import './App.css'
 
-function App() {
+function Main() {
   return (
     <div className="App">
       <header className="App-header">
@@ -26,5 +33,24 @@ function App() {
     </div>
   )
 }
+
+function App() {
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <Route
+        id="base"
+        element={<>
+          <Outlet />
+        </>}
+      >
+        <Route id="home" path="/" index element={<Main />} />
+        <Route id="404" path="*" element={<Navigate to="/" replace={true} />} />
+      </Route>
+    )
+  )
+
+  return <RouterProvider router={router} />
+}
+
 
 export default App
