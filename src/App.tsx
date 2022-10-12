@@ -11,17 +11,30 @@ import { Button, Card, Label, TextInput, Tooltip } from 'flowbite-react'
 import './App.css'
 
 interface MainProps {
-  seed?: string 
+  seed?: string
+  logout: () => void
 }
-function Main({ seed }: MainProps) {
+function Main({ seed, logout }: MainProps) {
   if (!seed) {
     return <Navigate to="/login" replace={true} />
   }
 
-  return (
-    <div className="text-3xl">
-      { seed }
-    </div>
+  return (<>
+      <div className="text-3xl">
+        { seed }
+      </div>
+
+      <Tooltip content="Forget seed and logout!">
+        <Button
+          outline={true}
+          gradientDuoTone="purpleToBlue"
+          size="xl"
+          onClick={() => logout()}
+        >
+          Logout
+        </Button>
+      </Tooltip>
+    </>
   )
 }
 
@@ -82,10 +95,14 @@ function App() {
           <Outlet />
         </div>}
       >
-        <Route id="home" path="/" index element={<Main seed={seed}/>} />
+        <Route id="home" path="/" index element={<Main seed={seed} logout={() => {
+            setSeed(undefined)
+          }} />}
+        />
         <Route id="login" path="/login" index element={seed ? <Navigate to="/" replace={true} /> : <Login onSubmit={(seed) => {
-          setSeed(seed)
-        }}/>} />
+            setSeed(seed)
+          }}/>}
+        />
         <Route id="404" path="*" element={<Navigate to="/" replace={true} />} />
       </Route>
     )
