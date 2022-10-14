@@ -6,13 +6,20 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "prettier --check --no-error-on-unmatched-pattern 'src/**/*.{ts,tsx,json,css,md}'",
+    "format": "prettier --write --no-error-on-unmatched-pattern 'src/**/*.{ts,tsx,json,css,md}'"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
     ]
+  },
+  "prettier": {
+    "printWidth": 120,
+    "semi": false,
+    "singleQuote": true
   },
   "browserslist": {
     "production": [
@@ -41,6 +48,7 @@
     "flowbite": "^1.5.3",
     "flowbite-react": "^0.2.0",
     "postcss": "^8.4.17",
+    "prettier": "^2.7.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.4.2",
