@@ -32,6 +32,7 @@ The project is licensed under the MIT License. See [LICENSE](LICENSE) for detail
 - BIP32: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
 - BIP85: https://github.com/scgbckbone/bips/blob/passwords/bip-0085.mediawiki
 - BIP85-passwords: https://github.com/Coldcard/firmware/blob/master/docs/bip85-passwords.md
+- scure-bip32 (GitHub): https://github.com/paulmillr/scure-bip32
 - tailwind: https://tailwindcss.com/
 - flowbite: https://flowbite-react.com/
 - react-router: https://reactrouter.com/
