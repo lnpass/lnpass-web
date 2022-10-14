@@ -12,6 +12,7 @@ import { HDKey } from '@scure/bip32'
 import { randomBytes } from '@noble/hashes/utils'
 import './App.css'
 import { LnpassId, lnpassIdToSeed, seedToLnpassId, toLnpassIdOrThrow } from './utils/lnpassId'
+import { Sidebar } from './Sidebar'
 
 interface AccountCardProps {
   account: HDKey
@@ -32,20 +33,18 @@ function AccountCard({ account }: AccountCardProps) {
 
 interface IndexProps {
   lnpassId?: LnpassId
-  logout: () => void
 }
-function Index({ lnpassId, logout }: IndexProps) {
+function Index({ lnpassId }: IndexProps) {
   if (!lnpassId) {
     return <Navigate to="/login" replace={true} />
   } else {
-    return <Main lnpassId={lnpassId} logout={logout} />
+    return <Main lnpassId={lnpassId} />
   }
 }
 interface MainProps {
   lnpassId: LnpassId
-  logout: () => void
 }
-function Main({ lnpassId, logout }: MainProps) {
+function Main({ lnpassId }: MainProps) {
   const seed = useMemo(() => lnpassIdToSeed(lnpassId), [lnpassId])
   const hdkey = useMemo(() => HDKey.fromMasterSeed(seed), [seed])
 
@@ -53,11 +52,6 @@ function Main({ lnpassId, logout }: MainProps) {
 
   return (
     <div className="p-2">
-      <Tooltip content="Forget seed and logout!">
-        <Button outline={true} gradientDuoTone="purpleToBlue" size="xl" onClick={() => logout()}>
-          Logout
-        </Button>
-      </Tooltip>
       <div className="text-lg">{lnpassId}</div>
 
       {accounts.map((it) => (
@@ -156,18 +150,20 @@ function App() {
         }
       >
         <Route
-          id="home"
-          path="/"
-          index
+          id="parent"
           element={
-            <Index
-              lnpassId={lnpassId}
-              logout={() => {
-                setLnpassId(undefined)
-              }}
-            />
+            <div className="flex flex-row">
+              <Sidebar
+                logout={() => {
+                  setLnpassId(undefined)
+                }}
+              />
+              <Outlet />
+            </div>
           }
-        />
+        >
+          <Route id="home" path="/" index element={<Index lnpassId={lnpassId} />} />
+        </Route>
         <Route
           id="login"
           path="/login"
