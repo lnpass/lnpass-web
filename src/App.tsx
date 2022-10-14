@@ -8,12 +8,12 @@ import {
   Outlet,
 } from 'react-router-dom'
 import { Button, Card, Label, TextInput, Tooltip } from 'flowbite-react'
-import { ArrowRightIcon, UserPlusIcon, RocketLaunchIcon } from '@heroicons/react/24/solid'
+import { ArrowRightIcon, UserPlusIcon } from '@heroicons/react/24/solid'
 import { HDKey } from '@scure/bip32'
 import { randomBytes } from '@noble/hashes/utils'
-import './App.css'
 import { LnpassId, lnpassIdToSeed, seedToLnpassId, toLnpassIdOrThrow } from './utils/lnpassId'
 import { Sidebar } from './Sidebar'
+import './App.css'
 
 interface Account {
   path: string
