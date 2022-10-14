@@ -35,4 +35,5 @@ The project is licensed under the MIT License. See [LICENSE](LICENSE) for detail
 - scure-bip32 (GitHub): https://github.com/paulmillr/scure-bip32
 - tailwind: https://tailwindcss.com/
 - flowbite: https://flowbite-react.com/
+- heroicons: https://heroicons.com/
 - react-router: https://reactrouter.com/

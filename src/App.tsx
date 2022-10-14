@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -8,6 +8,7 @@ import {
   Outlet,
 } from 'react-router-dom'
 import { Button, Card, Label, TextInput, Tooltip } from 'flowbite-react'
+import { ArrowRightIcon, UserPlusIcon, RocketLaunchIcon } from '@heroicons/react/24/solid'
 import { HDKey } from '@scure/bip32'
 import { randomBytes } from '@noble/hashes/utils'
 import './App.css'
@@ -77,16 +78,22 @@ function Main({ lnpassId }: MainProps) {
       <h2 className="text-3xl font-bold">Identities</h2>
       <div className="text-lg">{lnpassId}</div>
 
-      <div className="flex-none mt-4">
+      <div className="mt-4">
         {accounts.length === 0 ? (
-          <>
+          <div className="cursor-pointer" onClick={() => addNewAccount()}>
             <Card>
-              <div className="cursor-pointer" onClick={() => addNewAccount()}>
-                <span>Hey there!</span>
-                <p>Go ahead, create your first identity</p>
+              <div className="flex flex-row items-center gap-4">
+                <div className="text-3xl">👋</div>
+                <div className="flex-1">
+                  <span>Hey there!</span>
+                  <p>Go ahead, create your first identity</p>
+                </div>
+                <div>
+                  <ArrowRightIcon className="h-8 w-8 text-purple-500" />
+                </div>
               </div>
             </Card>
-          </>
+          </div>
         ) : (
           <>
             {accounts.map((it) => (
@@ -97,7 +104,7 @@ function Main({ lnpassId }: MainProps) {
             <div className="flex-none mt-4">
               <Tooltip content="Let's go!">
                 <Button outline={true} gradientDuoTone="purpleToBlue" size="xl" onClick={() => addNewAccount()}>
-                  <div className="text-xl">+</div>
+                  <UserPlusIcon className="h-6 w-6" />
                 </Button>
               </Tooltip>
             </div>
@@ -159,7 +166,7 @@ function Login({ onSubmit }: LoginProps) {
                     size="xl"
                     onClick={() => onSubmitButtonClicked()}
                   >
-                    <div className="text-xl">&gt;</div>
+                    <ArrowRightIcon className="h-6 w-6" />
                   </Button>
                 </Tooltip>
               </div>
@@ -171,7 +178,7 @@ function Login({ onSubmit }: LoginProps) {
           <div className="flex justify-center">
             <Tooltip content="Create a new identity pool!">
               <Button outline={true} gradientDuoTone="purpleToBlue" size="xl" onClick={() => onNewButtonClicked()}>
-                <div className="text-xl">New</div>
+                <div className="text-xl">Create</div>
               </Button>
             </Tooltip>
           </div>

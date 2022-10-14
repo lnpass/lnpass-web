@@ -1,5 +1,6 @@
 import { Button, Sidebar as FbSidebar, Tooltip } from 'flowbite-react'
 
+import { IdentificationIcon, FolderArrowDownIcon } from '@heroicons/react/24/solid'
 interface SidebarProps {
   logout?: () => void
 }
@@ -13,16 +14,20 @@ export function Sidebar({ logout }: SidebarProps) {
         </FbSidebar.Logo>
         <FbSidebar.Items>
           <FbSidebar.ItemGroup>
-            <FbSidebar.Item href="#">Item 1</FbSidebar.Item>
+            <FbSidebar.Item href="#" icon={IdentificationIcon}>
+              Identities
+            </FbSidebar.Item>
           </FbSidebar.ItemGroup>
           <FbSidebar.ItemGroup>
-            <FbSidebar.Item href="#">Item 2</FbSidebar.Item>
+            <FbSidebar.Item href="#" icon={FolderArrowDownIcon}>
+              Backup
+            </FbSidebar.Item>
           </FbSidebar.ItemGroup>
         </FbSidebar.Items>
         {logout && (
           <div className="mt-4">
-            <Tooltip content="Forget seed and logout!">
-              <Button outline={true} gradientDuoTone="purpleToBlue" size="xl" onClick={() => logout()}>
+            <Tooltip content="Forget identities and logout!">
+              <Button outline={true} gradientDuoTone="purpleToBlue" onClick={() => logout()}>
                 Logout
               </Button>
             </Tooltip>
