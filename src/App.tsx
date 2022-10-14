@@ -14,8 +14,12 @@ import './App.css'
 import { LnpassId, lnpassIdToSeed, seedToLnpassId, toLnpassIdOrThrow } from './utils/lnpassId'
 import { Sidebar } from './Sidebar'
 
+interface Account {
+  path: string
+  hdKey: HDKey
+}
 interface AccountCardProps {
-  account: HDKey
+  account: Account
 }
 function AccountCard({ account }: AccountCardProps) {
   return (
@@ -48,17 +52,58 @@ function Main({ lnpassId }: MainProps) {
   const seed = useMemo(() => lnpassIdToSeed(lnpassId), [lnpassId])
   const hdkey = useMemo(() => HDKey.fromMasterSeed(seed), [seed])
 
-  const accounts = [hdkey.derive(`m/0/2147483647'/1`)]
+  const toAccount = (hdKey: HDKey, path: string): Account => {
+    return {
+      path,
+      hdKey: hdKey.derive(path),
+    }
+  }
+  const [accounts, setAccounts] = useState<Account[]>([])
+
+  const addNewAccount = () => {
+    if (accounts.length === 0) {
+      setAccounts((current) => [...current, toAccount(hdkey, `m/0/2147483647'/1`)])
+    } else {
+      setAccounts((current) => {
+        const lastAccount = accounts[accounts.length - 1]
+        const newAccount = toAccount(hdkey, `m/0/2147483647'/${lastAccount.hdKey.index + 1}`)
+        return [...current, newAccount]
+      })
+    }
+  }
 
   return (
     <div className="p-2">
+      <h2 className="text-3xl font-bold">Identities</h2>
       <div className="text-lg">{lnpassId}</div>
 
-      {accounts.map((it) => (
-        <div key={it.fingerprint}>
-          <AccountCard account={it} />
-        </div>
-      ))}
+      <div className="flex-none mt-4">
+        {accounts.length === 0 ? (
+          <>
+            <Card>
+              <div className="cursor-pointer" onClick={() => addNewAccount()}>
+                <span>Hey there!</span>
+                <p>Go ahead, create your first identity</p>
+              </div>
+            </Card>
+          </>
+        ) : (
+          <>
+            {accounts.map((it) => (
+              <div key={it.hdKey.index} className="mb-2">
+                <AccountCard account={it} />
+              </div>
+            ))}
+            <div className="flex-none mt-4">
+              <Tooltip content="Let's go!">
+                <Button outline={true} gradientDuoTone="purpleToBlue" size="xl" onClick={() => addNewAccount()}>
+                  <div className="text-xl">+</div>
+                </Button>
+              </Tooltip>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   )
 }
