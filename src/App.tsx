@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -9,14 +9,14 @@ import {
 } from 'react-router-dom'
 import { Button, Card, Label, TextInput, Tooltip } from 'flowbite-react'
 import { HDKey } from '@scure/bip32'
-import { bytesToHex, hexToBytes, randomBytes } from '@noble/hashes/utils';
+import { randomBytes } from '@noble/hashes/utils';
 import './App.css'
+import { LnpassId, lnpassIdToSeed, seedToLnpassId, toLnpassIdOrThrow } from './utils/lnpassId';
 
 interface AccountCardProps {
   account: HDKey
 }
 function AccountCard({ account }: AccountCardProps) {
-
   return (<Card>
     <pre>
       {JSON.stringify(account, null, 2)}
@@ -34,21 +34,25 @@ function AccountCard({ account }: AccountCardProps) {
   </Card>)
 }
 
-interface MainProps {
-  seed?: string
+
+interface IndexProps {
+  lnpassId?: LnpassId
   logout: () => void
 }
-function Main({ seed, logout }: MainProps) {
-  if (!seed) {
+function Index({ lnpassId, logout }: IndexProps) {
+  if (!lnpassId) {
     return <Navigate to="/login" replace={true} />
+  } else {
+    return <Main lnpassId={lnpassId} logout={logout} />
   }
-  const seedTmp =
-  'fffcf9f6f3f0edeae7e4e1dedbd8d5d2cfccc9c6c3c0bdbab7b4b1aeaba8a5a29f9c999693908d8a8784817e7b7875726f6c696663605d5a5754514e4b484542'
-  const hdkey = HDKey.fromMasterSeed(hexToBytes(seedTmp))
-
-  console.log(hdkey)
-
-  console.log(hdkey.derive(`m/0/2147483647'/1`))
+}
+interface MainProps {
+  lnpassId: LnpassId
+  logout: () => void
+}
+function Main({ lnpassId, logout }: MainProps) {
+  const seed = useMemo(() => lnpassIdToSeed(lnpassId), [lnpassId])
+  const hdkey = useMemo(() => HDKey.fromMasterSeed(seed), [seed])
 
   const accounts = [hdkey.derive(`m/0/2147483647'/1`)]
 
@@ -63,8 +67,8 @@ function Main({ seed, logout }: MainProps) {
           Logout
         </Button>
       </Tooltip>
-      <div className="text-3xl">
-        { seed }
+      <div className="text-lg">
+        { lnpassId }
       </div>
 
       {accounts.map((it) => (<div key={it.fingerprint}>
@@ -75,15 +79,26 @@ function Main({ seed, logout }: MainProps) {
 }
 
 interface LoginProps {
-  onSubmit: (seed: string) => void
+  onSubmit: (id: LnpassId) => void
 }
 function Login({ onSubmit }: LoginProps) {
-  const [seedInput, setSeedInput] = useState('')
+  const [lnpassIdInput, setLnpassIdInput] = useState('')
 
   const onNewButtonClicked = () => {
     const random = randomBytes(64)
-    const seed = bytesToHex(random)
-    onSubmit(seed)
+    const lnpassId = seedToLnpassId(random)
+    setLnpassIdInput(lnpassId)
+    setTimeout(() => {
+      onSubmit(lnpassId)
+    }, 4)
+  }
+
+  const onSubmitButtonClicked = () => {
+    try {
+      onSubmit(toLnpassIdOrThrow(lnpassIdInput))
+    } catch(e) {
+      console.error(e)
+    }
   }
 
   return (
@@ -107,8 +122,8 @@ function Login({ onSubmit }: LoginProps) {
                   type="text"
                   sizing="lg"
                   placeholder="lnpass1..."
-                  value={seedInput}
-                  onChange={(e) => setSeedInput(e.target.value)}
+                  value={lnpassIdInput}
+                  onChange={(e) => setLnpassIdInput(e.target.value)}
                 />
               </div>
               <div className="flex-none">
@@ -117,7 +132,7 @@ function Login({ onSubmit }: LoginProps) {
                     outline={true}
                     gradientDuoTone="purpleToBlue"
                     size="xl"
-                    onClick={() => onSubmit(seedInput)}
+                    onClick={() => onSubmitButtonClicked()}
                   >
                     <div className="text-xl">&gt;</div>
                   </Button>
@@ -147,7 +162,7 @@ function Login({ onSubmit }: LoginProps) {
 }
 
 function App() {
-  const [seed, setSeed] = useState<string>()
+  const [lnpassId, setLnpassId] = useState<LnpassId>()
 
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -157,12 +172,12 @@ function App() {
           <Outlet />
         </div>}
       >
-        <Route id="home" path="/" index element={<Main seed={seed} logout={() => {
-            setSeed(undefined)
+        <Route id="home" path="/" index element={<Index lnpassId={lnpassId} logout={() => {
+            setLnpassId(undefined)
           }} />}
         />
-        <Route id="login" path="/login" index element={seed ? <Navigate to="/" replace={true} /> : <Login onSubmit={(seed) => {
-            setSeed(seed)
+        <Route id="login" path="/login" index element={lnpassId ? <Navigate to="/" replace={true} /> : <Login onSubmit={(lnpassId) => {
+            setLnpassId(lnpassId)
           }}/>}
         />
         <Route id="404" path="*" element={<Navigate to="/" replace={true} />} />
