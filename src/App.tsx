@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -7,31 +7,104 @@ import {
   RouterProvider,
   Outlet,
 } from 'react-router-dom'
-import { Button, Card, Label, TextInput, Tooltip } from 'flowbite-react'
-import { ArrowRightIcon, UserPlusIcon } from '@heroicons/react/24/solid'
+import { Button, Card, Label, Modal, ModalProps, Textarea, TextInput, Tooltip } from 'flowbite-react'
+import { ArrowRightIcon, UserPlusIcon, CheckCircleIcon } from '@heroicons/react/24/solid'
 import { HDKey } from '@scure/bip32'
 import { randomBytes } from '@noble/hashes/utils'
 import { LnpassId, lnpassIdToSeed, seedToLnpassId, toLnpassIdOrThrow } from './utils/lnpassId'
 import { Sidebar } from './Sidebar'
 import './App.css'
+import { decodeLnurlAuthRequest } from './utils/lnurlAuth'
 
 interface Account {
   path: string
   hdKey: HDKey
 }
+
+interface LoginModalProps extends ModalProps {
+  account: Account
+}
+
+function LoginModal({ account, show, onClose }: LoginModalProps) {
+  const [lnurlAuthRequestInput, setLnurlAuthRequestInput] = useState('')
+
+  const url = useMemo(() => {
+    if (!lnurlAuthRequestInput) return null
+
+    try {
+      const decoded = decodeLnurlAuthRequest(lnurlAuthRequestInput)
+      return new URL(decoded)
+    } catch (e) {
+      return null
+    }
+  }, [lnurlAuthRequestInput])
+
+  useEffect(() => {
+    if (!show) {
+      setLnurlAuthRequestInput('')
+    }
+  }, [show])
+
+  // TODO: move this to higher level
+  const onLoginButtonClicked = () => {
+    if (!url) return
+
+    const hashingKey = account.hdKey.derive(`m/138'/0`)
+    console.log(hashingKey)
+
+  }
+
+  return (
+    <Modal show={show} onClose={onClose}>
+      <Modal.Header>Login with {account.path}</Modal.Header>
+      <Modal.Body>
+        <>
+          <div className="">
+            <div className="hidden">
+              <Label htmlFor="lnurlAuthRequest" value="lnurl-auth Request" />
+            </div>
+            <Textarea
+              id="lnurlAuthRequest"
+              placeholder="lightning:lnurl1..."
+              required={true}
+              rows={4}
+              value={lnurlAuthRequestInput}
+              onChange={(e) => setLnurlAuthRequestInput(e.target.value)}
+            />
+          </div>
+
+          {url && (
+            <div className="mt-4 text-2xl flex items-center gap-2">
+              <CheckCircleIcon className="h-8 w-8 text-green-500" />
+              {url.hostname}
+            </div>
+          )}
+        </>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button gradientDuoTone="purpleToBlue" onClick={() => onLoginButtonClicked()} disabled={!url}>
+          {url ? <>Login to {url.hostname}</> : <>Login</>}
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  )
+}
 interface AccountCardProps {
   account: Account
 }
 function AccountCard({ account }: AccountCardProps) {
+  const [showLoginModal, setShowLoginModal] = useState(false)
+
   return (
     <Card>
       <pre>{JSON.stringify(account, null, 2)}</pre>
 
       <div className="w-1/4">
-        <Button gradientDuoTone="purpleToBlue" size="xl" onClick={() => null}>
+        <Button gradientDuoTone="purpleToBlue" size="xl" onClick={() => setShowLoginModal(true)}>
           Login
         </Button>
       </div>
+      <LoginModal account={account} show={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </Card>
   )
 }
