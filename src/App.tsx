@@ -12,14 +12,16 @@ import { ArrowRightIcon, UserPlusIcon, CheckCircleIcon } from '@heroicons/react/
 import { HDKey } from '@scure/bip32'
 import { randomBytes } from '@noble/hashes/utils'
 import { LnpassId, lnpassIdToSeed, seedToLnpassId, toLnpassIdOrThrow } from './utils/lnpassId'
+import { decodeLnurlAuthRequest, deriveLinkingKey } from './utils/lnurlAuth'
 import { Sidebar } from './Sidebar'
 import './App.css'
-import { decodeLnurlAuthRequest } from './utils/lnurlAuth'
 
 interface Account {
   path: string
   hdKey: HDKey
 }
+
+type ActionEnum = 'register' | 'login' | 'link' | 'auth' | null
 
 interface LoginModalProps extends ModalProps {
   account: Account
@@ -39,6 +41,9 @@ function LoginModal({ account, show, onClose }: LoginModalProps) {
     }
   }, [lnurlAuthRequestInput])
 
+  const action = useMemo<ActionEnum>(() => (url ? (url.searchParams.get('action') as ActionEnum) : null), [url])
+  const k1 = useMemo(() => (url ? url.searchParams.get('k1') : null), [url])
+
   useEffect(() => {
     if (!show) {
       setLnurlAuthRequestInput('')
@@ -47,11 +52,12 @@ function LoginModal({ account, show, onClose }: LoginModalProps) {
 
   // TODO: move this to higher level
   const onLoginButtonClicked = () => {
-    if (!url) return
+    if (url === null || k1 === null) return
 
-    const hashingKey = account.hdKey.derive(`m/138'/0`)
-    console.log(hashingKey)
-
+    console.log(url)
+    console.log(k1)
+    const linkingKey = deriveLinkingKey(account.hdKey, url)
+    console.log(linkingKey)
   }
 
   return (
@@ -77,6 +83,7 @@ function LoginModal({ account, show, onClose }: LoginModalProps) {
             <div className="mt-4 text-2xl flex items-center gap-2">
               <CheckCircleIcon className="h-8 w-8 text-green-500" />
               {url.hostname}
+              {action && <>: {action}</>}
             </div>
           )}
         </>
@@ -134,13 +141,17 @@ function Main({ lnpassId }: MainProps) {
   }
   const [accounts, setAccounts] = useState<Account[]>([])
 
+  // TODO: should get entropy via https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki
   const addNewAccount = () => {
+    const app_no = 19557 // sha256('lnpass') := 0x4c65... := 19557
+    const basePath = `m/83696968'/${app_no}`
+
     if (accounts.length === 0) {
-      setAccounts((current) => [...current, toAccount(hdkey, `m/0/2147483647'/1`)])
+      setAccounts((current) => [...current, toAccount(hdkey, `${basePath}/0`)])
     } else {
       setAccounts((current) => {
         const lastAccount = accounts[accounts.length - 1]
-        const newAccount = toAccount(hdkey, `m/0/2147483647'/${lastAccount.hdKey.index + 1}`)
+        const newAccount = toAccount(hdkey, `${basePath}/${lastAccount.hdKey.index + 1}`)
         return [...current, newAccount]
       })
     }
