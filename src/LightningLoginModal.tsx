@@ -67,7 +67,7 @@ function LnurlAuthRequestCameraInput({ onChange, onError }: LnurlAuthRequestCame
         html5QrcodeScanner.clear()
       }
     } catch (e) {}
-  }, [containerRef])
+  }, [containerRef, onChange, onError])
 
   return (
     <div className="flex flex-col">
