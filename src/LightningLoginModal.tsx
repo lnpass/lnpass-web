@@ -5,11 +5,11 @@ import { buildLnurlAuthUrl, decodeLnurlAuthRequest } from './utils/lnurlAuth'
 
 type ActionEnum = 'register' | 'login' | 'link' | 'auth' | null
 
-interface LoginModalProps extends ModalProps {
+interface LightningLoginModalProps extends ModalProps {
   account: Account
 }
 
-export function LoginModal({ account, show, onClose }: LoginModalProps) {
+export function LightningLoginModal({ account, show, onClose }: LightningLoginModalProps) {
   const linkRef = useRef<HTMLAnchorElement>(null)
   const [lnurlAuthRequestInput, setLnurlAuthRequestInput] = useState('')
 

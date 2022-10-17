@@ -7,7 +7,7 @@ import {
   RouterProvider,
   Outlet,
 } from 'react-router-dom'
-import { LnpassId  } from './utils/lnpassId'
+import { LnpassId } from './utils/lnpassId'
 import { IdentitiesPage } from './IdentitiesPage'
 import { LoginPage } from './LoginPage'
 import { Sidebar } from './Sidebar'

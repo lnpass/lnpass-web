@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react'
 import { Button, Card, Tooltip } from 'flowbite-react'
 import { ArrowRightIcon, UserPlusIcon, PencilSquareIcon, BoltIcon } from '@heroicons/react/24/solid'
 import { HDKey } from '@scure/bip32'
-import { LnpassId, lnpassIdToSeed,  } from './utils/lnpassId'
+import { LnpassId, lnpassIdToSeed } from './utils/lnpassId'
 import { AccountEditModal } from './AccountEditModal'
-import { LoginModal } from './LoginModal'
+import { LightningLoginModal } from './LightningLoginModal'
 
 interface AccountCardProps {
   account: Account
@@ -105,7 +105,11 @@ export function IdentitiesPage({ lnpassId }: IdentitiesPageProps) {
           <>
             {selectedAccount && (
               <>
-                <LoginModal account={selectedAccount} show={showLoginModal} onClose={() => setShowLoginModal(false)} />
+                <LightningLoginModal
+                  account={selectedAccount}
+                  show={showLoginModal}
+                  onClose={() => setShowLoginModal(false)}
+                />
                 <AccountEditModal
                   account={selectedAccount}
                   onSave={(info) => {
