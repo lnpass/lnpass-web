@@ -1,6 +1,11 @@
 import { Link } from 'react-router-dom'
-import { Button, Sidebar as FbSidebar, Tooltip } from 'flowbite-react'
-import { IdentificationIcon, DocumentArrowUpIcon, DocumentArrowDownIcon } from '@heroicons/react/24/solid'
+import { Sidebar as FbSidebar } from 'flowbite-react'
+import {
+  IdentificationIcon,
+  DocumentArrowUpIcon,
+  DocumentArrowDownIcon,
+  ArrowLeftOnRectangleIcon,
+} from '@heroicons/react/24/outline'
 import ROUTES from './routes'
 interface SidebarProps {
   logout?: () => void
@@ -31,16 +36,16 @@ export function Sidebar({ logout }: SidebarProps) {
               Import
             </FbSidebar.Item>
           </FbSidebar.ItemGroup>
+          {logout && (
+            <FbSidebar.ItemGroup>
+              <div className="cursor-pointer">
+                <FbSidebar.Item as={'span'} icon={ArrowLeftOnRectangleIcon} onClick={() => logout()}>
+                  Logout
+                </FbSidebar.Item>
+              </div>
+            </FbSidebar.ItemGroup>
+          )}
         </FbSidebar.Items>
-        {logout && (
-          <div className="mt-4">
-            <Tooltip content="Forget identities and logout!">
-              <Button outline={true} gradientDuoTone="purpleToBlue" onClick={() => logout()}>
-                Logout
-              </Button>
-            </Tooltip>
-          </div>
-        )}
       </FbSidebar>
     </div>
   )

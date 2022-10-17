@@ -32,7 +32,7 @@ function AccountCard({ account, edit, loginWithLightning }: AccountCardProps) {
 
       <div className="w-64">
         <Button gradientDuoTone="purpleToBlue" onClick={() => loginWithLightning(account)}>
-          <BoltIcon className="h-8 w-8 pr-1" />
+          <BoltIcon className="h-6 w-6 mr-3" />
           Login with Lightning
         </Button>
       </div>
@@ -81,7 +81,6 @@ export function IdentitiesPage({ lnpassId }: IdentitiesPageProps) {
   return (
     <>
       <h2 className="text-3xl font-bold tracking-tighter">Identities</h2>
-      <div className="hidden text-sm text-slate-500">{lnpassId}</div>
 
       <div className="mt-2 mb-4">
         {accounts.length === 0 ? (
@@ -103,8 +102,9 @@ export function IdentitiesPage({ lnpassId }: IdentitiesPageProps) {
           <>
             <div className="flex-none mb-4">
               <Tooltip content="Let's go!">
-                <Button outline={true} gradientDuoTone="purpleToBlue" onClick={() => addNewAccount()}>
-                  <UserPlusIcon className="h-6 w-6" />
+                <Button gradientDuoTone="purpleToBlue" onClick={() => addNewAccount()}>
+                  <UserPlusIcon className="h-6 w-6 mr-3" />
+                  New identity
                 </Button>
               </Tooltip>
             </div>
