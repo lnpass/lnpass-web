@@ -25,6 +25,10 @@ export function AccountEditModal({ account, onSave, show, onClose }: AccountEdit
     }
   }, [show, account])
 
+  if (!show) {
+    return <></>
+  }
+
   return (
     <Modal show={show} onClose={onClose}>
       <Modal.Header>Edit {account.name}</Modal.Header>

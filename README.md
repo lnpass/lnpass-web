@@ -37,3 +37,4 @@ The project is licensed under the MIT License. See [LICENSE](LICENSE) for detail
 - flowbite: https://flowbite-react.com/
 - heroicons: https://heroicons.com/
 - react-router: https://reactrouter.com/
+- html5-qrcode: https://github.com/mebjas/html5-qrcode

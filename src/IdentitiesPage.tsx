@@ -76,8 +76,6 @@ export function IdentitiesPage({ lnpassId }: IdentitiesPageProps) {
     })()
 
     setAccounts((current) => [...current, newAccount])
-    setSelectedAccount(newAccount)
-    setShowEditModal(true)
   }
 
   return (
