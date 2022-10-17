@@ -81,7 +81,7 @@ export function IdentitiesPage({ lnpassId }: IdentitiesPageProps) {
   }
 
   return (
-    <div className="w-full p-2">
+    <>
       <h2 className="text-3xl font-bold tracking-tighter">Identities</h2>
       <div className="hidden text-sm text-slate-500">{lnpassId}</div>
 
@@ -147,6 +147,6 @@ export function IdentitiesPage({ lnpassId }: IdentitiesPageProps) {
           </>
         )}
       </div>
-    </div>
+    </>
   )
 }

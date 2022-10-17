@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -8,8 +8,9 @@ import {
   Outlet,
 } from 'react-router-dom'
 import { LnpassId } from './utils/lnpassId'
-import { IdentitiesPage } from './IdentitiesPage'
 import { LoginPage } from './LoginPage'
+import { IdentitiesPage } from './IdentitiesPage'
+import { ExportPage } from './ExportPage'
 import { Sidebar } from './Sidebar'
 import './App.css'
 
@@ -47,11 +48,19 @@ function App() {
                   setLnpassId(undefined)
                 }}
               />
-              <Outlet />
+
+              <div className="w-full p-2">
+                <Outlet />
+              </div>
             </div>
           }
         >
           <Route id="home" path="/" index element={<Index lnpassId={lnpassId} />} />
+          {lnpassId && (
+            <>
+              <Route id="export" path="export" element={<ExportPage lnpassId={lnpassId} />} />
+            </>
+          )}
         </Route>
         <Route
           id="login"
