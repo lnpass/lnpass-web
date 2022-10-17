@@ -32,9 +32,9 @@ export function Sidebar({ logout }: SidebarProps) {
                 Export
               </FbSidebar.Item>
             </Link>
-            <FbSidebar.Item as={'span'} icon={DocumentArrowUpIcon}>
+            {/*<FbSidebar.Item as={'span'} icon={DocumentArrowUpIcon}>
               Import
-            </FbSidebar.Item>
+            </FbSidebar.Item>*/}
           </FbSidebar.ItemGroup>
           {logout && (
             <FbSidebar.ItemGroup>
