@@ -7,6 +7,7 @@ import {
   RouterProvider,
   Outlet,
 } from 'react-router-dom'
+import ROUTES from './routes'
 import { LnpassId } from './utils/lnpassId'
 import { LoginPage } from './LoginPage'
 import { IdentitiesPage } from './IdentitiesPage'
@@ -20,7 +21,7 @@ interface IndexProps {
 
 function Index({ lnpassId }: IndexProps) {
   if (!lnpassId) {
-    return <Navigate to="/login" replace={true} />
+    return <Navigate to={ROUTES.login} replace={true} />
   } else {
     return <IdentitiesPage lnpassId={lnpassId} />
   }
@@ -55,20 +56,20 @@ function App() {
             </div>
           }
         >
-          <Route id="home" path="/" index element={<Index lnpassId={lnpassId} />} />
+          <Route id="home" path={ROUTES.home} index element={<Index lnpassId={lnpassId} />} />
           {lnpassId && (
             <>
-              <Route id="export" path="export" element={<ExportPage lnpassId={lnpassId} />} />
+              <Route id="export" path={ROUTES.export} element={<ExportPage lnpassId={lnpassId} />} />
             </>
           )}
         </Route>
         <Route
           id="login"
-          path="/login"
+          path={ROUTES.login}
           index
           element={
             lnpassId ? (
-              <Navigate to="/" replace={true} />
+              <Navigate to={ROUTES.home} replace={true} />
             ) : (
               <LoginPage
                 onSubmit={(lnpassId) => {
@@ -78,7 +79,7 @@ function App() {
             )
           }
         />
-        <Route id="404" path="*" element={<Navigate to="/" replace={true} />} />
+        <Route id="404" path="*" element={<Navigate to={ROUTES['*']} replace={true} />} />
       </Route>
     )
   )

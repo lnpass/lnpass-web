@@ -1,7 +1,7 @@
-import { Button, Sidebar as FbSidebar, Tooltip } from 'flowbite-react'
-
-import { IdentificationIcon, DocumentArrowUpIcon, DocumentArrowDownIcon } from '@heroicons/react/24/solid'
 import { Link } from 'react-router-dom'
+import { Button, Sidebar as FbSidebar, Tooltip } from 'flowbite-react'
+import { IdentificationIcon, DocumentArrowUpIcon, DocumentArrowDownIcon } from '@heroicons/react/24/solid'
+import ROUTES from './routes'
 interface SidebarProps {
   logout?: () => void
 }
@@ -15,14 +15,14 @@ export function Sidebar({ logout }: SidebarProps) {
         </FbSidebar.Logo>
         <FbSidebar.Items>
           <FbSidebar.ItemGroup>
-            <Link to="/">
+            <Link to={ROUTES.home}>
               <FbSidebar.Item as={'span'} icon={IdentificationIcon}>
                 Identities
               </FbSidebar.Item>
             </Link>
           </FbSidebar.ItemGroup>
           <FbSidebar.ItemGroup>
-            <Link to="/export">
+            <Link to={ROUTES.export}>
               <FbSidebar.Item as={'span'} icon={DocumentArrowDownIcon}>
                 Export
               </FbSidebar.Item>
