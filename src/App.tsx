@@ -61,7 +61,7 @@ function LoginModal({ account, show, onClose }: LoginModalProps) {
 
   return (
     <Modal show={show} onClose={onClose}>
-      <Modal.Header>Login with {account.path}</Modal.Header>
+      <Modal.Header>Login with {account.name}</Modal.Header>
       <Modal.Body>
         <>
           <div className="">
@@ -107,25 +107,22 @@ function LoginModal({ account, show, onClose }: LoginModalProps) {
 }
 interface AccountCardProps {
   account: Account
+  loginWithLightning: (account: Account) => void
 }
-function AccountCard({ account }: AccountCardProps) {
-  const [showLoginModal, setShowLoginModal] = useState(false)
-
+function AccountCard({ account, loginWithLightning }: AccountCardProps) {
   return (
     <Card>
-
       <h6 className="text-xl font-bold tracking-tighter">{account.name}</h6>
       <div className="hidden">
         <div className="text-xs text-slate-500">{account.path}</div>
       </div>
 
       <div className="w-64">
-        <Button gradientDuoTone="purpleToBlue"  onClick={() => setShowLoginModal(true)}>
+        <Button gradientDuoTone="purpleToBlue"  onClick={() => loginWithLightning(account)}>
           <BoltIcon className="h-8 w-8 pr-1" />
           Login with Lightning
         </Button>
       </div>
-      <LoginModal account={account} show={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </Card>
   )
 }
@@ -156,6 +153,8 @@ function Main({ lnpassId }: MainProps) {
     }
   }
   const [accounts, setAccounts] = useState<Account[]>([])
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
 
   // TODO: should get entropy via https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki
   const addNewAccount = () => {
@@ -196,9 +195,15 @@ function Main({ lnpassId }: MainProps) {
           </div>
         ) : (
           <>
+            {selectedAccount && (<>
+              <LoginModal account={selectedAccount} show={showLoginModal} onClose={() => setShowLoginModal(false)} />
+            </>)}
             {accounts.map((it) => (
               <div key={it.hdKey.index} className="mb-2">
-                <AccountCard account={it} />
+                <AccountCard account={it} loginWithLightning={(account) => {
+                  setSelectedAccount(account)
+                  setShowLoginModal(true)
+                }} />
               </div>
             ))}
             <div className="flex-none mt-4">
