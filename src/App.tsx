@@ -6,13 +6,15 @@ import {
   Route,
   RouterProvider,
   Outlet,
+  Link,
 } from 'react-router-dom'
 import { Button, Card, Label, Modal, ModalProps, Textarea, TextInput, Tooltip } from 'flowbite-react'
 import { ArrowRightIcon, UserPlusIcon, CheckCircleIcon } from '@heroicons/react/24/solid'
 import { HDKey } from '@scure/bip32'
-import { randomBytes } from '@noble/hashes/utils'
+import { hexToBytes, randomBytes } from '@noble/hashes/utils'
 import { LnpassId, lnpassIdToSeed, seedToLnpassId, toLnpassIdOrThrow } from './utils/lnpassId'
-import { decodeLnurlAuthRequest, deriveLinkingKey } from './utils/lnurlAuth'
+import { buildLnurlAuthUrl, decodeLnurlAuthRequest, executeAuthRequest } from './utils/lnurlAuth'
+import { Signature } from '@noble/secp256k1'
 import { Sidebar } from './Sidebar'
 import './App.css'
 
@@ -42,7 +44,15 @@ function LoginModal({ account, show, onClose }: LoginModalProps) {
   }, [lnurlAuthRequestInput])
 
   const action = useMemo<ActionEnum>(() => (url ? (url.searchParams.get('action') as ActionEnum) : null), [url])
-  const k1 = useMemo(() => (url ? url.searchParams.get('k1') : null), [url])
+
+  const authUrl = useMemo(() => {
+    if (url === null) return null
+    try {
+      return buildLnurlAuthUrl(account.hdKey, url)
+    } catch (e) {
+      return null
+    }
+  }, [url])
 
   useEffect(() => {
     if (!show) {
@@ -50,14 +60,23 @@ function LoginModal({ account, show, onClose }: LoginModalProps) {
     }
   }, [show])
 
-  // TODO: move this to higher level
-  const onLoginButtonClicked = () => {
-    if (url === null || k1 === null) return
+  const onLoginButtonClicked = async () => {
+    if (authUrl === null) return
 
-    console.log(url)
-    console.log(k1)
-    const linkingKey = deriveLinkingKey(account.hdKey, url)
-    console.log(linkingKey)
+    try {
+      await executeAuthRequest(authUrl)
+    } catch (e) {
+      console.warn('Could not execute request automatically - e.g. CORS issue - will open new tab!', e)
+      const newTab = window.open(authUrl, '_lnpassAuth', 'noopener,noreferrer')
+      newTab?.addEventListener(
+        'onload',
+        () => {
+          console.log('Closing')
+          newTab?.close()
+        },
+        { once: true }
+      )
+    }
   }
 
   return (
@@ -89,9 +108,11 @@ function LoginModal({ account, show, onClose }: LoginModalProps) {
         </>
       </Modal.Body>
       <Modal.Footer>
-        <Button gradientDuoTone="purpleToBlue" onClick={() => onLoginButtonClicked()} disabled={!url}>
-          {url ? <>Login to {url.hostname}</> : <>Login</>}
-        </Button>
+        <div className="flex flex-col w-full">
+          <Button gradientDuoTone="purpleToBlue" onClick={() => onLoginButtonClicked()} disabled={!authUrl}>
+            {url ? <>Login to {url.hostname}</> : <>Login</>}
+          </Button>
+        </div>
       </Modal.Footer>
     </Modal>
   )
