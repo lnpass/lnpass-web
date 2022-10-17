@@ -17,6 +17,7 @@ import { Sidebar } from './Sidebar'
 import './App.css'
 
 interface Account {
+  name: string
   path: string
   hdKey: HDKey
 }
@@ -112,10 +113,14 @@ function AccountCard({ account }: AccountCardProps) {
 
   return (
     <Card>
-      <pre>{JSON.stringify(account, null, 2)}</pre>
 
-      <div className="w-1/4">
-        <Button gradientDuoTone="purpleToBlue" size="xl" onClick={() => setShowLoginModal(true)}>
+      <h6 className="text-xl font-bold tracking-tighter">{account.name}</h6>
+      <div className="hidden">
+        <div className="text-xs text-slate-500">{account.path}</div>
+      </div>
+
+      <div className="w-64">
+        <Button gradientDuoTone="purpleToBlue"  onClick={() => setShowLoginModal(true)}>
           <BoltIcon className="h-8 w-8 pr-1" />
           Login with Lightning
         </Button>
@@ -140,12 +145,14 @@ interface MainProps {
 }
 function Main({ lnpassId }: MainProps) {
   const seed = useMemo(() => lnpassIdToSeed(lnpassId), [lnpassId])
-  const hdkey = useMemo(() => HDKey.fromMasterSeed(seed), [seed])
+  const masterKey = useMemo(() => HDKey.fromMasterSeed(seed), [seed])
 
-  const toAccount = (hdKey: HDKey, path: string): Account => {
+  const toAccount = (parentKey: HDKey, path: string): Account => {
+    const hdKey = parentKey.derive(path)
     return {
+      name: `Identity #${hdKey.index}`,
       path,
-      hdKey: hdKey.derive(path),
+      hdKey,
     }
   }
   const [accounts, setAccounts] = useState<Account[]>([])
@@ -156,20 +163,20 @@ function Main({ lnpassId }: MainProps) {
     const basePath = `m/83696968'/${app_no}`
 
     if (accounts.length === 0) {
-      setAccounts((current) => [...current, toAccount(hdkey, `${basePath}/0`)])
+      setAccounts((current) => [...current, toAccount(masterKey, `${basePath}/0`)])
     } else {
       setAccounts((current) => {
         const lastAccount = accounts[accounts.length - 1]
-        const newAccount = toAccount(hdkey, `${basePath}/${lastAccount.hdKey.index + 1}`)
+        const newAccount = toAccount(masterKey, `${basePath}/${lastAccount.hdKey.index + 1}`)
         return [...current, newAccount]
       })
     }
   }
 
   return (
-    <div className="p-2">
-      <h2 className="text-3xl font-bold">Identities</h2>
-      <div className="text-lg">{lnpassId}</div>
+    <div className="w-full p-2">
+      <h2 className="text-3xl font-bold tracking-tighter">Identities</h2>
+      <div className="hidden text-sm text-slate-500">{lnpassId}</div>
 
       <div className="mt-4">
         {accounts.length === 0 ? (
