@@ -8,19 +8,14 @@ import {
   Outlet,
 } from 'react-router-dom'
 import { Button, Card, Label, Modal, ModalProps, Textarea, TextInput, Tooltip } from 'flowbite-react'
-import { ArrowRightIcon, UserPlusIcon, CheckCircleIcon, BoltIcon } from '@heroicons/react/24/solid'
+import { ArrowRightIcon, UserPlusIcon, CheckCircleIcon, BoltIcon, PencilSquareIcon } from '@heroicons/react/24/solid'
 import { HDKey } from '@scure/bip32'
 import { randomBytes } from '@noble/hashes/utils'
 import { LnpassId, lnpassIdToSeed, seedToLnpassId, toLnpassIdOrThrow } from './utils/lnpassId'
 import { buildLnurlAuthUrl, decodeLnurlAuthRequest } from './utils/lnurlAuth'
 import { Sidebar } from './Sidebar'
 import './App.css'
-
-interface Account {
-  name: string
-  path: string
-  hdKey: HDKey
-}
+import { AccountEditModal } from './AccountEditModal'
 
 type ActionEnum = 'register' | 'login' | 'link' | 'auth' | null
 
@@ -89,17 +84,26 @@ function LoginModal({ account, show, onClose }: LoginModalProps) {
       </Modal.Body>
       <Modal.Footer>
         <div className="flex flex-col w-full">
-          {!authUrl ? (<Button gradientDuoTone="purpleToBlue" disabled>
-            Login
-          </Button>) : (<>
-            <Button gradientDuoTone="purpleToBlue" onClick={() => linkRef.current?.click()}>
-              Login to {authUrl.hostname}
+          {!authUrl ? (
+            <Button gradientDuoTone="purpleToBlue" disabled>
+              Login
             </Button>
-            <a ref={linkRef} className="hidden"
-              href={authUrl.toString()} target="_lnpassAuth" rel="noopener noreferrer">
-              Login to {authUrl.hostname}
-            </a>
-          </>)}
+          ) : (
+            <>
+              <Button gradientDuoTone="purpleToBlue" onClick={() => linkRef.current?.click()}>
+                Login to {authUrl.hostname}
+              </Button>
+              <a
+                ref={linkRef}
+                className="hidden"
+                href={authUrl.toString()}
+                target="_lnpassAuth"
+                rel="noopener noreferrer"
+              >
+                Login to {authUrl.hostname}
+              </a>
+            </>
+          )}
         </div>
       </Modal.Footer>
     </Modal>
@@ -107,18 +111,29 @@ function LoginModal({ account, show, onClose }: LoginModalProps) {
 }
 interface AccountCardProps {
   account: Account
+  edit: (account: Account) => void
   loginWithLightning: (account: Account) => void
 }
-function AccountCard({ account, loginWithLightning }: AccountCardProps) {
+function AccountCard({ account, edit, loginWithLightning }: AccountCardProps) {
   return (
     <Card>
-      <h6 className="text-xl font-bold tracking-tighter">{account.name}</h6>
+      <div className="flex flex-row items-center">
+        <h6 className="text-xl font-bold tracking-tighter">{account.name}</h6>
+        <div className="flex flex-wrap ml-3">
+          <Button color="light" size="xs" outline={true} onClick={() => edit(account)}>
+            <PencilSquareIcon className="h-4 w-4 text-slate-500" />
+          </Button>
+        </div>
+      </div>
       <div className="hidden">
         <div className="text-xs text-slate-500">{account.path}</div>
       </div>
+      <div className="">
+        <div className="text-slate-500">{account.description}</div>
+      </div>
 
       <div className="w-64">
-        <Button gradientDuoTone="purpleToBlue"  onClick={() => loginWithLightning(account)}>
+        <Button gradientDuoTone="purpleToBlue" onClick={() => loginWithLightning(account)}>
           <BoltIcon className="h-8 w-8 pr-1" />
           Login with Lightning
         </Button>
@@ -154,22 +169,26 @@ function Main({ lnpassId }: MainProps) {
   }
   const [accounts, setAccounts] = useState<Account[]>([])
   const [showLoginModal, setShowLoginModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
 
   // TODO: should get entropy via https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki
   const addNewAccount = () => {
-    const app_no = 19557 // sha256('lnpass') := 0x4c65... := 19557
-    const basePath = `m/83696968'/${app_no}`
+    const newAccount = (() => {
+      const app_no = 19557 // sha256('lnpass') := 0x4c65... := 19557
+      const basePath = `m/83696968'/${app_no}`
 
-    if (accounts.length === 0) {
-      setAccounts((current) => [...current, toAccount(masterKey, `${basePath}/0`)])
-    } else {
-      setAccounts((current) => {
+      if (accounts.length === 0) {
+        return toAccount(masterKey, `${basePath}/0`)
+      } else {
         const lastAccount = accounts[accounts.length - 1]
-        const newAccount = toAccount(masterKey, `${basePath}/${lastAccount.hdKey.index + 1}`)
-        return [...current, newAccount]
-      })
-    }
+        return toAccount(masterKey, `${basePath}/${lastAccount.hdKey.index + 1}`)
+      }
+    })()
+
+    setAccounts((current) => [...current, newAccount])
+    setSelectedAccount(newAccount)
+    setShowEditModal(true)
   }
 
   return (
@@ -195,15 +214,34 @@ function Main({ lnpassId }: MainProps) {
           </div>
         ) : (
           <>
-            {selectedAccount && (<>
-              <LoginModal account={selectedAccount} show={showLoginModal} onClose={() => setShowLoginModal(false)} />
-            </>)}
+            {selectedAccount && (
+              <>
+                <LoginModal account={selectedAccount} show={showLoginModal} onClose={() => setShowLoginModal(false)} />
+                <AccountEditModal
+                  account={selectedAccount}
+                  onSave={(info) => {
+                    selectedAccount.name = info.name
+                    selectedAccount.description = info.description
+                    setShowEditModal(false)
+                  }}
+                  show={showEditModal}
+                  onClose={() => setShowEditModal(false)}
+                />
+              </>
+            )}
             {accounts.map((it) => (
               <div key={it.hdKey.index} className="mb-2">
-                <AccountCard account={it} loginWithLightning={(account) => {
-                  setSelectedAccount(account)
-                  setShowLoginModal(true)
-                }} />
+                <AccountCard
+                  account={it}
+                  edit={(account) => {
+                    setSelectedAccount(account)
+                    setShowEditModal(true)
+                  }}
+                  loginWithLightning={(account) => {
+                    setSelectedAccount(account)
+                    setShowLoginModal(true)
+                  }}
+                />
               </div>
             ))}
             <div className="flex-none mt-4">
