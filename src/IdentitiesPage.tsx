@@ -85,7 +85,7 @@ export function IdentitiesPage({ lnpassId }: IdentitiesPageProps) {
       <h2 className="text-3xl font-bold tracking-tighter">Identities</h2>
       <div className="hidden text-sm text-slate-500">{lnpassId}</div>
 
-      <div className="mt-4">
+      <div className="mt-2 mb-4">
         {accounts.length === 0 ? (
           <div className="cursor-pointer" onClick={() => addNewAccount()}>
             <Card>
@@ -103,6 +103,13 @@ export function IdentitiesPage({ lnpassId }: IdentitiesPageProps) {
           </div>
         ) : (
           <>
+            <div className="flex-none mb-4">
+              <Tooltip content="Let's go!">
+                <Button outline={true} gradientDuoTone="purpleToBlue" onClick={() => addNewAccount()}>
+                  <UserPlusIcon className="h-6 w-6" />
+                </Button>
+              </Tooltip>
+            </div>
             {selectedAccount && (
               <>
                 <LightningLoginModal
@@ -137,13 +144,6 @@ export function IdentitiesPage({ lnpassId }: IdentitiesPageProps) {
                 />
               </div>
             ))}
-            <div className="flex-none mt-4">
-              <Tooltip content="Let's go!">
-                <Button outline={true} gradientDuoTone="purpleToBlue" size="xl" onClick={() => addNewAccount()}>
-                  <UserPlusIcon className="h-6 w-6" />
-                </Button>
-              </Tooltip>
-            </div>
           </>
         )}
       </div>

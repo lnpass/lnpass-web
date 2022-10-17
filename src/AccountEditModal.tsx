@@ -29,30 +29,32 @@ export function AccountEditModal({ account, onSave, show, onClose }: AccountEdit
     <Modal show={show} onClose={onClose}>
       <Modal.Header>Edit {account.name}</Modal.Header>
       <Modal.Body>
-        <div className="">
+        <div className="flex flex-col gap-4">
           <div className="">
-            <Label htmlFor="name" value="Name" />
+            <div className="">
+              <Label htmlFor="name" value="Name" />
+            </div>
+            <TextInput
+              id="name"
+              placeholder="Business, School, etc."
+              required={true}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
-          <TextInput
-            id="name"
-            placeholder="Business, School, etc."
-            required={true}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
-        <div className="">
           <div className="">
-            <Label htmlFor="description" value="Description" />
+            <div className="">
+              <Label htmlFor="description" value="Description" />
+            </div>
+            <Textarea
+              id="description"
+              placeholder="Use this identity for business, school, etc."
+              required={false}
+              rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </div>
-          <Textarea
-            id="description"
-            placeholder="Use this identity for business, school, etc."
-            required={false}
-            rows={4}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
         </div>
       </Modal.Body>
       <Modal.Footer>
