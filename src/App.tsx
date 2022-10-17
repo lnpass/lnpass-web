@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -6,15 +6,13 @@ import {
   Route,
   RouterProvider,
   Outlet,
-  Link,
 } from 'react-router-dom'
 import { Button, Card, Label, Modal, ModalProps, Textarea, TextInput, Tooltip } from 'flowbite-react'
-import { ArrowRightIcon, UserPlusIcon, CheckCircleIcon } from '@heroicons/react/24/solid'
+import { ArrowRightIcon, UserPlusIcon, CheckCircleIcon, BoltIcon } from '@heroicons/react/24/solid'
 import { HDKey } from '@scure/bip32'
-import { hexToBytes, randomBytes } from '@noble/hashes/utils'
+import { randomBytes } from '@noble/hashes/utils'
 import { LnpassId, lnpassIdToSeed, seedToLnpassId, toLnpassIdOrThrow } from './utils/lnpassId'
-import { buildLnurlAuthUrl, decodeLnurlAuthRequest, executeAuthRequest } from './utils/lnurlAuth'
-import { Signature } from '@noble/secp256k1'
+import { buildLnurlAuthUrl, decodeLnurlAuthRequest } from './utils/lnurlAuth'
 import { Sidebar } from './Sidebar'
 import './App.css'
 
@@ -30,14 +28,14 @@ interface LoginModalProps extends ModalProps {
 }
 
 function LoginModal({ account, show, onClose }: LoginModalProps) {
+  const linkRef = useRef<HTMLAnchorElement>(null)
   const [lnurlAuthRequestInput, setLnurlAuthRequestInput] = useState('')
 
   const url = useMemo(() => {
     if (!lnurlAuthRequestInput) return null
 
     try {
-      const decoded = decodeLnurlAuthRequest(lnurlAuthRequestInput)
-      return new URL(decoded)
+      return new URL(decodeLnurlAuthRequest(lnurlAuthRequestInput))
     } catch (e) {
       return null
     }
@@ -52,32 +50,13 @@ function LoginModal({ account, show, onClose }: LoginModalProps) {
     } catch (e) {
       return null
     }
-  }, [url])
+  }, [account.hdKey, url])
 
   useEffect(() => {
     if (!show) {
       setLnurlAuthRequestInput('')
     }
   }, [show])
-
-  const onLoginButtonClicked = async () => {
-    if (authUrl === null) return
-
-    try {
-      await executeAuthRequest(authUrl)
-    } catch (e) {
-      console.warn('Could not execute request automatically - e.g. CORS issue - will open new tab!', e)
-      const newTab = window.open(authUrl, '_lnpassAuth', 'noopener,noreferrer')
-      newTab?.addEventListener(
-        'onload',
-        () => {
-          console.log('Closing')
-          newTab?.close()
-        },
-        { once: true }
-      )
-    }
-  }
 
   return (
     <Modal show={show} onClose={onClose}>
@@ -109,9 +88,17 @@ function LoginModal({ account, show, onClose }: LoginModalProps) {
       </Modal.Body>
       <Modal.Footer>
         <div className="flex flex-col w-full">
-          <Button gradientDuoTone="purpleToBlue" onClick={() => onLoginButtonClicked()} disabled={!authUrl}>
-            {url ? <>Login to {url.hostname}</> : <>Login</>}
-          </Button>
+          {!authUrl ? (<Button gradientDuoTone="purpleToBlue" disabled>
+            Login
+          </Button>) : (<>
+            <Button gradientDuoTone="purpleToBlue" onClick={() => linkRef.current?.click()}>
+              Login to {authUrl.hostname}
+            </Button>
+            <a ref={linkRef} className="hidden"
+              href={authUrl.toString()} target="_lnpassAuth" rel="noopener noreferrer">
+              Login to {authUrl.hostname}
+            </a>
+          </>)}
         </div>
       </Modal.Footer>
     </Modal>
@@ -129,7 +116,8 @@ function AccountCard({ account }: AccountCardProps) {
 
       <div className="w-1/4">
         <Button gradientDuoTone="purpleToBlue" size="xl" onClick={() => setShowLoginModal(true)}>
-          Login
+          <BoltIcon className="h-8 w-8 pr-1" />
+          Login with Lightning
         </Button>
       </div>
       <LoginModal account={account} show={showLoginModal} onClose={() => setShowLoginModal(false)} />
