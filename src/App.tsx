@@ -7,13 +7,13 @@ import {
   RouterProvider,
   Outlet,
 } from 'react-router-dom'
-import { Button, Card, Label, TextInput, Tooltip } from 'flowbite-react'
+import { Button, Card, Tooltip } from 'flowbite-react'
 import { ArrowRightIcon, UserPlusIcon, BoltIcon, PencilSquareIcon } from '@heroicons/react/24/solid'
 import { HDKey } from '@scure/bip32'
-import { randomBytes } from '@noble/hashes/utils'
-import { LnpassId, lnpassIdToSeed, seedToLnpassId, toLnpassIdOrThrow } from './utils/lnpassId'
+import { LnpassId, lnpassIdToSeed,  } from './utils/lnpassId'
 import { AccountEditModal } from './AccountEditModal'
 import { LoginModal } from './LoginModal'
+import { LoginPage } from './LoginPage'
 import { Sidebar } from './Sidebar'
 import './App.css'
 
@@ -166,79 +166,6 @@ function Main({ lnpassId }: MainProps) {
   )
 }
 
-interface LoginProps {
-  onSubmit: (id: LnpassId) => void
-}
-function Login({ onSubmit }: LoginProps) {
-  const [lnpassIdInput, setLnpassIdInput] = useState('')
-
-  const onNewButtonClicked = () => {
-    const random = randomBytes(64)
-    const lnpassId = seedToLnpassId(random)
-    setLnpassIdInput(lnpassId)
-    setTimeout(() => {
-      onSubmit(lnpassId)
-    }, 4)
-  }
-
-  const onSubmitButtonClicked = () => {
-    try {
-      onSubmit(toLnpassIdOrThrow(lnpassIdInput))
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
-  return (
-    <div className="flex h-screen justify-center items-center text-3xl">
-      <div className="w-full max-w-7xl">
-        <Card>
-          <div className="flex justify-center">Welcome</div>
-          <div>
-            <div className="hidden">
-              <Label htmlFor="lnpass1" value="lnpass1" />
-            </div>
-            <div className="flex flex-row gap-2 items-center">
-              <div className="flex-1">
-                <TextInput
-                  id="lnpass1"
-                  type="text"
-                  sizing="lg"
-                  placeholder="lnpass1..."
-                  value={lnpassIdInput}
-                  onChange={(e) => setLnpassIdInput(e.target.value)}
-                />
-              </div>
-              <div className="flex-none">
-                <Tooltip content="Let's go!">
-                  <Button
-                    outline={true}
-                    gradientDuoTone="purpleToBlue"
-                    size="xl"
-                    onClick={() => onSubmitButtonClicked()}
-                  >
-                    <ArrowRightIcon className="h-6 w-6" />
-                  </Button>
-                </Tooltip>
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-center">
-            <div className="text-sm">... or create new ...</div>
-          </div>
-          <div className="flex justify-center">
-            <Tooltip content="Create a new identity pool!">
-              <Button outline={true} gradientDuoTone="purpleToBlue" size="xl" onClick={() => onNewButtonClicked()}>
-                <div className="text-xl">Create</div>
-              </Button>
-            </Tooltip>
-          </div>
-        </Card>
-      </div>
-    </div>
-  )
-}
-
 function App() {
   const [lnpassId, setLnpassId] = useState<LnpassId>()
 
@@ -275,7 +202,7 @@ function App() {
             lnpassId ? (
               <Navigate to="/" replace={true} />
             ) : (
-              <Login
+              <LoginPage
                 onSubmit={(lnpassId) => {
                   setLnpassId(lnpassId)
                 }}
