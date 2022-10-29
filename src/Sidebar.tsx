@@ -1,32 +1,44 @@
 import { Link } from 'react-router-dom'
-import { Sidebar as FbSidebar } from 'flowbite-react'
+import { Sidebar as FbSidebar, Tooltip } from 'flowbite-react'
 import {
   IdentificationIcon,
   DocumentArrowUpIcon,
   DocumentArrowDownIcon,
   ArrowLeftOnRectangleIcon,
+  StarIcon,
 } from '@heroicons/react/24/outline'
 import ROUTES from './routes'
+
 interface SidebarProps {
+  bookmark?: string
   logout?: () => void
 }
 
-export function Sidebar({ logout }: SidebarProps) {
+export function Sidebar({ bookmark, logout }: SidebarProps) {
   return (
     <div className="w-fit">
       <FbSidebar>
-        <FbSidebar.Logo href="#" img="favicon.ico" imgAlt="lnpass logo">
+        <FbSidebar.Logo href="#" img="favicon.ico" imgAlt="">
           lnpass
         </FbSidebar.Logo>
         <FbSidebar.Items>
           <FbSidebar.ItemGroup>
-            <Link to={ROUTES.home}>
+            <Link to={{ pathname: ROUTES.home, hash: '#123' }}>
               <FbSidebar.Item as={'span'} icon={IdentificationIcon}>
                 Identities
               </FbSidebar.Item>
             </Link>
           </FbSidebar.ItemGroup>
           <FbSidebar.ItemGroup>
+            {bookmark && (
+              <Tooltip content="Drag me into your toolbar!">
+                <a href={bookmark}>
+                  <FbSidebar.Item as={'span'} icon={StarIcon}>
+                    Bookmark
+                  </FbSidebar.Item>
+                </a>
+              </Tooltip>
+            )}
             <Link to={ROUTES.export}>
               <FbSidebar.Item as={'span'} icon={DocumentArrowDownIcon}>
                 Export
@@ -36,15 +48,16 @@ export function Sidebar({ logout }: SidebarProps) {
               Import
             </FbSidebar.Item>*/}
           </FbSidebar.ItemGroup>
-          {logout && (
-            <FbSidebar.ItemGroup>
-              <div className="cursor-pointer">
+
+          <FbSidebar.ItemGroup>
+            <div className="cursor-pointer">
+              {logout && (
                 <FbSidebar.Item as={'span'} icon={ArrowLeftOnRectangleIcon} onClick={() => logout()}>
                   Logout
                 </FbSidebar.Item>
-              </div>
-            </FbSidebar.ItemGroup>
-          )}
+              )}
+            </div>
+          </FbSidebar.ItemGroup>
         </FbSidebar.Items>
       </FbSidebar>
     </div>

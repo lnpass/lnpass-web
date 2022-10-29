@@ -100,7 +100,7 @@ export function IdentitiesPage({ lnpassId }: IdentitiesPageProps) {
           </div>
         ) : (
           <>
-            <div className="flex-none mb-4">
+            <div className="flex mb-4">
               <Tooltip content="Let's go!">
                 <Button gradientDuoTone="purpleToBlue" onClick={() => addNewAccount()}>
                   <UserPlusIcon className="h-6 w-6 mr-3" />

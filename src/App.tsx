@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { Flowbite, useTheme } from 'flowbite-react'
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -13,8 +14,8 @@ import { LoginPage } from './LoginPage'
 import { IdentitiesPage } from './IdentitiesPage'
 import { ExportPage } from './ExportPage'
 import { Sidebar } from './Sidebar'
-import './App.css'
 
+import './App.css'
 interface IndexProps {
   lnpassId?: LnpassId
 }
@@ -28,7 +29,13 @@ function Index({ lnpassId }: IndexProps) {
 }
 
 function App() {
+  const theme = useTheme().theme
+
   const [lnpassId, setLnpassId] = useState<LnpassId>()
+
+  const bookmark = useMemo<string | undefined>(() => {
+    return lnpassId ? `${ROUTES.login}#${lnpassId}` : undefined
+  }, [lnpassId])
 
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -45,6 +52,7 @@ function App() {
           element={
             <div className="flex flex-row">
               <Sidebar
+                bookmark={bookmark}
                 logout={() => {
                   setLnpassId(undefined)
                 }}
@@ -84,7 +92,22 @@ function App() {
     )
   )
 
-  return <RouterProvider router={router} />
+  return (
+    <Flowbite
+      theme={{
+        theme: {
+          ...theme,
+          tooltip: {
+            ...theme.tooltip,
+            target: '',
+          },
+        },
+        usePreferences: false,
+      }}
+    >
+      <RouterProvider router={router} />
+    </Flowbite>
+  )
 }
 
 export default App
