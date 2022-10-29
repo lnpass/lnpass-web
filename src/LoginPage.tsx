@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button, Card, Label, TextInput, Tooltip } from 'flowbite-react'
 import { ArrowRightIcon } from '@heroicons/react/24/solid'
 import { randomBytes } from '@noble/hashes/utils'
 import { LnpassId, seedToLnpassId, toLnpassIdOrThrow } from './utils/lnpassId'
+import { useLocation } from 'react-router-dom'
 
 interface LoginPageProps {
   onSubmit: (id: LnpassId) => void
@@ -10,6 +11,19 @@ interface LoginPageProps {
 
 export function LoginPage({ onSubmit }: LoginPageProps) {
   const [lnpassIdInput, setLnpassIdInput] = useState('')
+  const location = useLocation()
+
+  useEffect(() => {
+    if (!location.hash) return
+
+    try {
+      const hashValue = location.hash.substring(1)
+      const lnpassId = toLnpassIdOrThrow(hashValue)
+      onSubmit(lnpassId)
+    } catch (e) {
+      console.debug(`Could parse url hash as lnpassId`)
+    }
+  }, [location, onSubmit])
 
   const onNewButtonClicked = () => {
     const random = randomBytes(64)
