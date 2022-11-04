@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react'
 import { Flowbite, useTheme } from 'flowbite-react'
 import {
+  createHashRouter,
   createBrowserRouter,
   createRoutesFromElements,
   Navigate,
   Route,
+  RouteObject,
   RouterProvider,
   Outlet,
 } from 'react-router-dom'
@@ -16,6 +18,12 @@ import { ExportPage } from './ExportPage'
 import { Sidebar } from './Sidebar'
 
 import './App.css'
+
+/* Using HashRouter for GitHub Pages compatibility */
+const USE_HASH_ROUTER = true
+
+const createRouter = (routes: RouteObject[]) => (USE_HASH_ROUTER ? createHashRouter : createBrowserRouter)(routes)
+
 interface IndexProps {
   lnpassId?: LnpassId
 }
@@ -34,10 +42,11 @@ function App() {
   const [lnpassId, setLnpassId] = useState<LnpassId>()
 
   const bookmark = useMemo<string | undefined>(() => {
-    return lnpassId ? `${ROUTES.login}#${lnpassId}` : undefined
+    if (!lnpassId) return
+    return `${USE_HASH_ROUTER ? '/#' : ''}${ROUTES.login}#${lnpassId}`
   }, [lnpassId])
 
-  const router = createBrowserRouter(
+  const router = createRouter(
     createRoutesFromElements(
       <Route
         id="base"

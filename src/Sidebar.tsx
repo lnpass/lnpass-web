@@ -23,7 +23,7 @@ export function Sidebar({ bookmark, logout }: SidebarProps) {
         </FbSidebar.Logo>
         <FbSidebar.Items>
           <FbSidebar.ItemGroup>
-            <Link to={{ pathname: ROUTES.home, hash: '#123' }}>
+            <Link to={{ pathname: ROUTES.home }}>
               <FbSidebar.Item as={'span'} icon={IdentificationIcon}>
                 Identities
               </FbSidebar.Item>
