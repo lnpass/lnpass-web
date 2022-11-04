@@ -48,9 +48,11 @@ interface LnurlAuthRequestCameraInputProps {
 
 function LnurlAuthRequestCameraInput({ onChange, onError }: LnurlAuthRequestCameraInputProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const [tryMountCounter, setTryMountCounter] = useState<number>(0)
 
   useEffect(() => {
     if (containerRef.current === null) return
+    if (tryMountCounter > 3) return
 
     try {
       const html5QrcodeScanner = new Html5QrcodeScanner(containerRef.current.id, QR_CODE_SCANNER_CONFIG, false)
@@ -63,13 +65,15 @@ function LnurlAuthRequestCameraInput({ onChange, onError }: LnurlAuthRequestCame
         }
       )
 
+      setTryMountCounter(0)
       return () => {
         html5QrcodeScanner.clear()
       }
     } catch (e) {
+      setTryMountCounter((current) => current + 1)
       console.error(e)
     }
-  }, [containerRef.current, onChange, onError])
+  }, [containerRef, tryMountCounter, onChange, onError])
 
   return (
     <div className="flex flex-col">
