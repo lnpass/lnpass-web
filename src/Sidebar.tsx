@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom'
 import { Sidebar as FbSidebar, Tooltip } from 'flowbite-react'
 import {
   IdentificationIcon,
-  DocumentArrowUpIcon,
   DocumentArrowDownIcon,
   ArrowLeftOnRectangleIcon,
   StarIcon,
