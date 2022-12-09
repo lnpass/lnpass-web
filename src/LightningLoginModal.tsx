@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Button, Label, Modal, ModalProps, Textarea } from 'flowbite-react'
+import { Badge, Button, Label, Modal, ModalProps, Textarea } from 'flowbite-react'
 import { CheckCircleIcon, QrCodeIcon, PencilIcon, ArrowPathIcon } from '@heroicons/react/24/solid'
 import { buildLnurlAuthUrl, decodeLnurlAuthRequest } from './utils/lnurlAuth'
 import { Html5QrcodeScanner, Html5QrcodeSupportedFormats, Html5QrcodeScanType } from 'html5-qrcode'
@@ -98,23 +98,33 @@ export function LightningLoginModal({ account, show, onClose }: LightningLoginMo
   const [lnurlAuthRequestInput, setLnurlAuthRequestInput] = useState('')
 
   const url = useMemo(() => {
-    if (!lnurlAuthRequestInput) return null
+    if (!lnurlAuthRequestInput) return
 
     try {
       return new URL(decodeLnurlAuthRequest(lnurlAuthRequestInput))
     } catch (e) {
-      return null
+      console.error('Could not decode input: ' + e || 'Unknown error')
+      return
     }
   }, [lnurlAuthRequestInput])
 
-  const action = useMemo<ActionEnum>(() => (url ? (url.searchParams.get('action') as ActionEnum) : null), [url])
+  const urlInfo = useMemo(() => {
+    if (!url) return
+    return {
+      action: (url.searchParams.get('action') as ActionEnum) || undefined,
+      protocol: url.protocol.replace(':', ''),
+      port:
+        url.port || (url.protocol === 'http:' ? '80' : undefined) || (url.protocol === 'https:' ? '443' : undefined),
+    }
+  }, [url])
 
   const authUrl = useMemo(() => {
-    if (url === null) return null
+    if (!url) return
     try {
       return buildLnurlAuthUrl(account.hdKey, url)
     } catch (e) {
-      return null
+      console.error('Could not build auth url: ' + e || 'Unknown error')
+      return
     }
   }, [account.hdKey, url])
 
@@ -145,7 +155,7 @@ export function LightningLoginModal({ account, show, onClose }: LightningLoginMo
           </div>
           {inputMode === InputMode.QRCODE && (
             <>
-              {authUrl === null ? (
+              {!authUrl ? (
                 <>
                   <LnurlAuthRequestCameraInput
                     onChange={(val) => setLnurlAuthRequestInput(val)}
@@ -169,11 +179,19 @@ export function LightningLoginModal({ account, show, onClose }: LightningLoginMo
           )}
 
           {url && (
-            <div className="mt-4 text-2xl flex items-center gap-2">
-              <CheckCircleIcon className="h-8 w-8 text-green-500" />
-              {url.hostname}
-              {action && <>: {action}</>}
-            </div>
+            <>
+              <div className="mt-4 text-2xl flex items-center gap-2">
+                <CheckCircleIcon className="h-8 w-8 text-green-500" />
+                {url.hostname}
+              </div>
+              {urlInfo && (
+                <div className="mt-2 text-gray-500 flex items-center gap-2">
+                  {urlInfo.action && <Badge color="info">Action: {urlInfo.action}</Badge>}
+                  {urlInfo.protocol && <Badge color="gray">Protocol: {urlInfo.protocol}</Badge>}
+                  {urlInfo.port && <Badge color="gray">Port: {urlInfo.port}</Badge>}
+                </div>
+              )}
+            </>
           )}
         </>
       </Modal.Body>
