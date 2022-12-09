@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Badge, Button, Label, Modal, ModalProps, Textarea } from 'flowbite-react'
-import { CheckCircleIcon, QrCodeIcon, PencilIcon, ArrowPathIcon } from '@heroicons/react/24/solid'
+import { CheckCircleIcon, XCircleIcon, QrCodeIcon, PencilIcon, ArrowPathIcon } from '@heroicons/react/24/solid'
 import { buildLnurlAuthUrl, decodeLnurlAuthRequest } from './utils/lnurlAuth'
 import { Html5QrcodeScanner, Html5QrcodeSupportedFormats, Html5QrcodeScanType } from 'html5-qrcode'
 
@@ -96,14 +96,16 @@ export function LightningLoginModal({ account, show, onClose }: LightningLoginMo
   const linkRef = useRef<HTMLAnchorElement>(null)
   const [inputMode, setInputMode] = useState(InputMode.QRCODE)
   const [lnurlAuthRequestInput, setLnurlAuthRequestInput] = useState('')
+  const [inputError, setInputError] = useState<Error | undefined>()
 
   const url = useMemo(() => {
+    setInputError(undefined)
     if (!lnurlAuthRequestInput) return
 
     try {
       return new URL(decodeLnurlAuthRequest(lnurlAuthRequestInput))
     } catch (e) {
-      console.error('Could not decode input: ' + e || 'Unknown error')
+      setInputError(e instanceof Error ? e : new Error('Could not decode input: Unkown Error'))
       return
     }
   }, [lnurlAuthRequestInput])
@@ -177,11 +179,18 @@ export function LightningLoginModal({ account, show, onClose }: LightningLoginMo
               <LnurlAuthRequestManualInput onChange={(val) => setLnurlAuthRequestInput(val)} />
             </>
           )}
-
+          {inputError && (
+            <>
+              <div className="mt-4 flex items-center gap-2">
+                <XCircleIcon className="min-w-[10%] h-8 w-8 text-red-500 " />
+                <div className="text-red-500 break-all">{inputError.message}</div>
+              </div>
+            </>
+          )}
           {url && (
             <>
               <div className="mt-4 flex items-center gap-2">
-                <CheckCircleIcon className="h-8 w-8 text-green-500" />
+                <CheckCircleIcon className="min-w-[10%] h-8 w-8 text-green-500" />
                 <div className="text-2xl break-all">{url.hostname}</div>
               </div>
               {urlInfo && (
