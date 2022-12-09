@@ -180,9 +180,9 @@ export function LightningLoginModal({ account, show, onClose }: LightningLoginMo
 
           {url && (
             <>
-              <div className="mt-4 text-2xl flex items-center gap-2">
+              <div className="mt-4 flex items-center gap-2">
                 <CheckCircleIcon className="h-8 w-8 text-green-500" />
-                {url.hostname}
+                <div className="text-2xl break-all">{url.hostname}</div>
               </div>
               {urlInfo && (
                 <div className="mt-2 text-gray-500 flex items-center gap-2">
