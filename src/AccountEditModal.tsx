@@ -61,11 +61,12 @@ export function AccountEditModal({ account, onSave, show, onClose }: AccountEdit
           </div>
         </div>
       </Modal.Body>
-      <Modal.Footer>
-        <Button color="gray" onClick={onClose}>
+      <Modal.Footer className="flex justify-between">
+        <Button className="w-full" color="gray" onClick={onClose}>
           Cancel
         </Button>
         <Button
+          className="w-full"
           onClick={() =>
             onSave({
               name,
