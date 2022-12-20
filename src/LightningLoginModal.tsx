@@ -38,7 +38,8 @@ const QR_CODE_SCANNER_CONFIG = {
   fps: 2,
   qrbox: { width: 250, height: 250 },
   rememberLastUsedCamera: false,
-  supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
+  // currently needs at least 2 scan types, otherwise there is a ReferenceError (last checked: 2022-12-20)
+  supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA, Html5QrcodeScanType.SCAN_TYPE_FILE],
 }
 
 interface LnurlAuthRequestCameraInputProps {
