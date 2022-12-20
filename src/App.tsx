@@ -61,10 +61,10 @@ function App() {
           id="parent"
           element={
             <>
-              <MobileMenuBar sidebarId='sidebar' />
+              <MobileMenuBar sidebarId="sidebar" />
               <div className="flex flex-row">
                 <Sidebar
-                  elementId='sidebar'
+                  elementId="sidebar"
                   bookmark={bookmark}
                   logout={() => {
                     setLnpassId(undefined)
