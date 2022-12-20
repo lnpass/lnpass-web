@@ -9,13 +9,17 @@ import {
 import ROUTES from './routes'
 
 interface SidebarProps {
+  elementId: string
   bookmark?: string
   logout?: () => void
 }
 
-export function Sidebar({ bookmark, logout }: SidebarProps) {
+export function Sidebar({ elementId, bookmark, logout }: SidebarProps) {
   return (
-    <div className="w-fit">
+    <div
+      id={elementId}
+      className="absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out"
+    >
       <FbSidebar>
         <FbSidebar.Logo href="#" img="favicon.ico" imgAlt="">
           lnpass

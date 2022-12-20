@@ -18,6 +18,7 @@ import { ExportPage } from './ExportPage'
 import { Sidebar } from './Sidebar'
 
 import './App.css'
+import { MobileMenuBar } from './MobileMenuBar'
 
 /* Using HashRouter for GitHub Pages compatibility */
 const USE_HASH_ROUTER = true
@@ -59,18 +60,22 @@ function App() {
         <Route
           id="parent"
           element={
-            <div className="flex flex-row">
-              <Sidebar
-                bookmark={bookmark}
-                logout={() => {
-                  setLnpassId(undefined)
-                }}
-              />
+            <>
+              <MobileMenuBar sidebarId='sidebar' />
+              <div className="flex flex-row">
+                <Sidebar
+                  elementId='sidebar'
+                  bookmark={bookmark}
+                  logout={() => {
+                    setLnpassId(undefined)
+                  }}
+                />
 
-              <div className="w-full p-2">
-                <Outlet />
+                <div className="w-full p-2">
+                  <Outlet />
+                </div>
               </div>
-            </div>
+            </>
           }
         >
           <Route id="home" path={ROUTES.home} index element={<Index lnpassId={lnpassId} />} />
