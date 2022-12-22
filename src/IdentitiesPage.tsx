@@ -13,6 +13,8 @@ import { LnpassId, lnpassIdToSeed, seedToLnpassId } from './utils/lnpassId'
 import { AccountEditModal } from './AccountEditModal'
 import { LightningLoginModal } from './LightningLoginModal'
 import { NostrKeysModal } from './components/NostrKeysModal'
+import { lnpassAccountDerivationPath } from './utils/lnpass'
+import { deriveEntropy } from './utils/bip85'
 
 interface AccountCardProps {
   account: Account
@@ -23,8 +25,9 @@ interface AccountCardProps {
 
 function AccountCard({ account, edit, onClickLightning, onClickNostr }: AccountCardProps) {
   const subLnpassId = useMemo(() => {
-    if (account.hdKey.privateKey === null) return
-    return seedToLnpassId(account.hdKey.privateKey)
+    // just derive an lnpass id from the first "lnpass account" of this account
+    const entropy = deriveEntropy(account.hdKey, lnpassAccountDerivationPath(0))
+    return seedToLnpassId(entropy)
   }, [account])
 
   return (
@@ -97,14 +100,11 @@ export function IdentitiesPage({ lnpassId }: IdentitiesPageProps) {
   // TODO: should get entropy via https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki
   const addNewAccount = () => {
     const newAccount = (() => {
-      const app_no = 19557 // sha256('lnpass') := 0x4c65... := 19557
-      const basePath = `m/83696968'/${app_no}`
-
       if (accounts.length === 0) {
-        return toAccount(masterKey, `${basePath}/0`)
+        return toAccount(masterKey, lnpassAccountDerivationPath(0))
       } else {
         const lastAccount = accounts[accounts.length - 1]
-        return toAccount(masterKey, `${basePath}/${lastAccount.hdKey.index + 1}`)
+        return toAccount(masterKey, lnpassAccountDerivationPath(lastAccount.hdKey.index + 1))
       }
     })()
 

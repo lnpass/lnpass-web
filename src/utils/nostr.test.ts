@@ -1,6 +1,6 @@
 /**
  * @jest-environment node
- * 
+ *
  * Must set jest environment to node, otherwise fails with:
  * "TypeError: Expected input type is Uint8Array (got object)"
  */
@@ -30,7 +30,7 @@ describe('nostr', () => {
     const seed = randomBytes(32)
     const masterKey = HDKey.fromMasterSeed(seed)
     const encoded = deriveNostrPrivateKey(masterKey)
-    expect(encoded.nip19).toMatch(new RegExp(`^nsec1.*`));
+    expect(encoded.nip19).toMatch(new RegExp(`^nsec1.*`))
     expect(encoded.hex).toBeDefined()
   })
 })
