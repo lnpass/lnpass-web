@@ -1,20 +1,14 @@
 import { Link } from 'react-router-dom'
-import { Sidebar as FbSidebar, Tooltip } from 'flowbite-react'
-import {
-  IdentificationIcon,
-  DocumentArrowDownIcon,
-  ArrowLeftOnRectangleIcon,
-  StarIcon,
-} from '@heroicons/react/24/outline'
+import { Sidebar as FbSidebar } from 'flowbite-react'
+import { IdentificationIcon, DocumentArrowDownIcon, ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline'
 import ROUTES from './routes'
 
 interface SidebarProps {
   elementId: string
-  bookmark?: string
   logout?: () => void
 }
 
-export function Sidebar({ elementId, bookmark, logout }: SidebarProps) {
+export function Sidebar({ elementId, logout }: SidebarProps) {
   return (
     <div
       id={elementId}
@@ -33,21 +27,17 @@ export function Sidebar({ elementId, bookmark, logout }: SidebarProps) {
             </Link>
           </FbSidebar.ItemGroup>
           <FbSidebar.ItemGroup>
-            {bookmark && (
-              <Tooltip content="Drag me into your toolbar!">
-                <a href={bookmark}>
-                  <FbSidebar.Item as={'span'} icon={StarIcon}>
-                    Bookmark
-                  </FbSidebar.Item>
-                </a>
-              </Tooltip>
-            )}
-            <Link to={ROUTES.export}>
+            <Link to={ROUTES.backup}>
+              <FbSidebar.Item as={'span'} icon={DocumentArrowDownIcon}>
+                Backup
+              </FbSidebar.Item>
+            </Link>
+            {/*<Link to={ROUTES.export}>
               <FbSidebar.Item as={'span'} icon={DocumentArrowDownIcon}>
                 Export
               </FbSidebar.Item>
             </Link>
-            {/*<FbSidebar.Item as={'span'} icon={DocumentArrowUpIcon}>
+            <FbSidebar.Item as={'span'} icon={DocumentArrowUpIcon}>
               Import
             </FbSidebar.Item>*/}
           </FbSidebar.ItemGroup>

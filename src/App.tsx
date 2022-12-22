@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Flowbite, useTheme } from 'flowbite-react'
 import {
   createHashRouter,
@@ -14,11 +14,11 @@ import ROUTES from './routes'
 import { LnpassId } from './utils/lnpassId'
 import { LoginPage } from './LoginPage'
 import { IdentitiesPage } from './IdentitiesPage'
-import { ExportPage } from './ExportPage'
 import { Sidebar } from './Sidebar'
 
 import './App.css'
 import { MobileMenuBar } from './MobileMenuBar'
+import { BackupPage } from './BackupPage'
 
 /* Using HashRouter for GitHub Pages compatibility */
 const USE_HASH_ROUTER = true
@@ -27,13 +27,14 @@ const createRouter = (routes: RouteObject[]) => (USE_HASH_ROUTER ? createHashRou
 
 interface IndexProps {
   lnpassId?: LnpassId
+  generateLoginHref: (LnpassId: LnpassId) => string
 }
 
-function Index({ lnpassId }: IndexProps) {
+function Index({ lnpassId, generateLoginHref }: IndexProps) {
   if (!lnpassId) {
     return <Navigate to={ROUTES.login} replace={true} />
   } else {
-    return <IdentitiesPage lnpassId={lnpassId} />
+    return <IdentitiesPage lnpassId={lnpassId} generateLoginHref={generateLoginHref} />
   }
 }
 
@@ -42,10 +43,11 @@ function App() {
 
   const [lnpassId, setLnpassId] = useState<LnpassId>()
 
-  const bookmark = useMemo<string | undefined>(() => {
-    if (!lnpassId) return
-    return `${USE_HASH_ROUTER ? '/#' : ''}${ROUTES.login}#${lnpassId}`
-  }, [lnpassId])
+  const generateLoginHref = useCallback(
+    (lnpassId: LnpassId) =>
+      `${window.location.protocol}//${window.location.host}${USE_HASH_ROUTER ? '/#' : ''}${ROUTES.login}#${lnpassId}`,
+    []
+  )
 
   const router = createRouter(
     createRoutesFromElements(
@@ -65,7 +67,6 @@ function App() {
               <div className="flex flex-row">
                 <Sidebar
                   elementId="sidebar"
-                  bookmark={bookmark}
                   logout={() => {
                     setLnpassId(undefined)
                   }}
@@ -78,10 +79,24 @@ function App() {
             </>
           }
         >
-          <Route id="home" path={ROUTES.home} index element={<Index lnpassId={lnpassId} />} />
+          <Route
+            id="home"
+            path={ROUTES.home}
+            index
+            element={<Index lnpassId={lnpassId} generateLoginHref={generateLoginHref} />}
+          />
           {lnpassId && (
             <>
-              <Route id="export" path={ROUTES.export} element={<ExportPage lnpassId={lnpassId} />} />
+              {/*<Route id="export" path={ROUTES.export} element={<ExportPage lnpassId={lnpassId} />} />*/}
+              <Route
+                id="backup"
+                path={ROUTES.backup}
+                element={
+                  <>
+                    <BackupPage lnpassId={lnpassId} generateLoginHref={generateLoginHref} />
+                  </>
+                }
+              />
             </>
           )}
         </Route>

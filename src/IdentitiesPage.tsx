@@ -19,16 +19,22 @@ import { deriveEntropy } from './utils/bip85'
 interface AccountCardProps {
   account: Account
   edit: (account: Account) => void
+  generateLoginHref?: (LnpassId: LnpassId) => string
   onClickLightning?: (account: Account) => void
   onClickNostr?: (account: Account) => void
 }
 
-function AccountCard({ account, edit, onClickLightning, onClickNostr }: AccountCardProps) {
+function AccountCard({ account, edit, generateLoginHref, onClickLightning, onClickNostr }: AccountCardProps) {
   const subLnpassId = useMemo(() => {
     // just derive an lnpass id from the first "lnpass account" of this account
     const entropy = deriveEntropy(account.hdKey, lnpassAccountDerivationPath(0))
     return seedToLnpassId(entropy)
   }, [account])
+
+  const subLnpassLoginHref = useMemo(() => {
+    if (!generateLoginHref) return
+    return generateLoginHref(subLnpassId)
+  }, [generateLoginHref, subLnpassId])
 
   return (
     <Card>
@@ -62,14 +68,16 @@ function AccountCard({ account, edit, onClickLightning, onClickNostr }: AccountC
             </Button>
           )}
         </div>
-        <div className="flex gap-2">
-          <a href={`/#/login#${subLnpassId}`} target="_blank" rel="noreferrer">
-            <Button size="xs" gradientDuoTone="pinkToOrange" outline={true}>
-              <ArrowTopRightOnSquareIcon className="h-6 w-6 mr-3" />
-              Lnpass
-            </Button>
-          </a>
-        </div>
+        {subLnpassLoginHref && (
+          <div className="flex gap-2">
+            <a href={subLnpassLoginHref} target="_blank" rel="noreferrer">
+              <Button size="xs" gradientDuoTone="pinkToOrange" outline={true}>
+                <ArrowTopRightOnSquareIcon className="h-6 w-6 mr-3" />
+                lnpass
+              </Button>
+            </a>
+          </div>
+        )}
       </div>
     </Card>
   )
@@ -77,9 +85,10 @@ function AccountCard({ account, edit, onClickLightning, onClickNostr }: AccountC
 
 interface IdentitiesPageProps {
   lnpassId: LnpassId
+  generateLoginHref: (LnpassId: LnpassId) => string
 }
 
-export function IdentitiesPage({ lnpassId }: IdentitiesPageProps) {
+export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPageProps) {
   const seed = useMemo(() => lnpassIdToSeed(lnpassId), [lnpassId])
   const masterKey = useMemo(() => HDKey.fromMasterSeed(seed), [seed])
 
@@ -173,6 +182,7 @@ export function IdentitiesPage({ lnpassId }: IdentitiesPageProps) {
                     setSelectedAccount(account)
                     setShowEditModal(true)
                   }}
+                  generateLoginHref={generateLoginHref}
                   onClickLightning={(account) => {
                     setSelectedAccount(account)
                     setShowLightningLoginModal(true)

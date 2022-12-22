@@ -1,7 +1,8 @@
 const ROUTES = {
   home: '/',
   login: '/login',
-  export: '/export',
+  //export: '/export',
+  backup: '/backup',
   import: '/import',
   '*': '/',
 }
