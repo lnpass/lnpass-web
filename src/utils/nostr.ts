@@ -1,4 +1,5 @@
 import { bytesToHex } from '@noble/hashes/utils'
+import { HDKey } from '@scure/bip32'
 import { bech32 } from 'bech32'
 
 // NIP-19: bech32-encoded entities
