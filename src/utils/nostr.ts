@@ -5,20 +5,41 @@ import { bech32 } from 'bech32'
 const NOSTR_PUBLIC_KEY_PREFIX = 'npub'
 const NOSTR_PRIVATE_KEY_PREFIX = 'nsec'
 
-export type NostrPubKey = `${typeof NOSTR_PUBLIC_KEY_PREFIX}1${string}`
-export type NostrPrvKey = `${typeof NOSTR_PRIVATE_KEY_PREFIX}1${string}`
+export type NostrPublicKey = `${typeof NOSTR_PUBLIC_KEY_PREFIX}1${string}`
+export type NostrPrivateKey = `${typeof NOSTR_PRIVATE_KEY_PREFIX}1${string}`
 
 const PUBKEY_LIMIT = NOSTR_PUBLIC_KEY_PREFIX.length + 7 + 128
 const PRVKEY_LIMIT = NOSTR_PRIVATE_KEY_PREFIX.length + 7 + 128
 
-export const toNostrPublicKey = (publicKey: Uint8Array): NostrPubKey => {
+// https://github.com/nostr-protocol/nips/blob/master/06.md
+const deriveNostrKey = (masterKey: HDKey): HDKey => {
+  return masterKey.derive(`m/44'/1237'/0'/0/0`)
+}
+
+export const toNostrPublicKey = (publicKey: Uint8Array): NostrPublicKey => {
   const words = bech32.toWords(publicKey)
-  const encoded = bech32.encode(NOSTR_PUBLIC_KEY_PREFIX, words, PUBKEY_LIMIT) as NostrPubKey
+  const encoded = bech32.encode(NOSTR_PUBLIC_KEY_PREFIX, words, PUBKEY_LIMIT) as NostrPublicKey
   return encoded
 }
 
-export const toNostrPrivateKey = (privateKey: Uint8Array): NostrPubKey => {
+export const toNostrPrivateKey = (privateKey: Uint8Array): NostrPrivateKey => {
   const words = bech32.toWords(privateKey)
-  const encoded = bech32.encode(NOSTR_PRIVATE_KEY_PREFIX, words, PRVKEY_LIMIT) as NostrPubKey
+  const encoded = bech32.encode(NOSTR_PRIVATE_KEY_PREFIX, words, PRVKEY_LIMIT) as NostrPrivateKey
   return encoded
+}
+
+export const deriveNostrPublicKey = (masterKey: HDKey): NostrPublicKey => {
+  const key = deriveNostrKey(masterKey)
+  if (key.publicKey === null) {
+    throw new Error('Public Key not avialable')
+  }
+  return toNostrPublicKey(key.publicKey)
+}
+
+export const deriveNostrPrivateKey = (masterKey: HDKey): NostrPrivateKey => {
+  const key = deriveNostrKey(masterKey)
+  if (key.privateKey === null) {
+    throw new Error('Private Key not avialable')
+  }
+  return toNostrPrivateKey(key.privateKey)
 }

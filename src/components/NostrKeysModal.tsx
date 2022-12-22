@@ -1,6 +1,6 @@
 import { Label, ModalProps, TextInput } from 'flowbite-react'
 import { useMemo } from 'react'
-import { toNostrPrivateKey, toNostrPublicKey } from '../utils/nostr'
+import { deriveNostrPrivateKey, deriveNostrPublicKey } from '../utils/nostr'
 import { InfoModal } from './InfoModal'
 
 interface NostrKeysModalProps extends ModalProps {
@@ -10,12 +10,12 @@ interface NostrKeysModalProps extends ModalProps {
 export function NostrKeysModal({ account, show, onClose, children, ...props }: NostrKeysModalProps) {
   const nostrPublicKey = useMemo(() => {
     if (account.hdKey.publicKey === null) return
-    return toNostrPublicKey(account.hdKey.publicKey)
+    return deriveNostrPublicKey(account.hdKey)
   }, [account])
 
   const nostrPrivateKey = useMemo(() => {
     if (account.hdKey.privateKey === null) return
-    return toNostrPrivateKey(account.hdKey.privateKey)
+    return deriveNostrPrivateKey(account.hdKey)
   }, [account])
 
   if (!show) {
