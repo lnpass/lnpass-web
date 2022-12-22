@@ -1,8 +1,15 @@
 import { useMemo, useState } from 'react'
 import { Button, Card, Tooltip } from 'flowbite-react'
-import { ArrowRightIcon, UserPlusIcon, PencilSquareIcon, BoltIcon, KeyIcon } from '@heroicons/react/24/solid'
+import {
+  ArrowRightIcon,
+  UserPlusIcon,
+  PencilSquareIcon,
+  BoltIcon,
+  KeyIcon,
+  ArrowTopRightOnSquareIcon,
+} from '@heroicons/react/24/solid'
 import { HDKey } from '@scure/bip32'
-import { LnpassId, lnpassIdToSeed } from './utils/lnpassId'
+import { LnpassId, lnpassIdToSeed, seedToLnpassId } from './utils/lnpassId'
 import { AccountEditModal } from './AccountEditModal'
 import { LightningLoginModal } from './LightningLoginModal'
 import { NostrKeysModal } from './components/NostrKeysModal'
@@ -15,6 +22,11 @@ interface AccountCardProps {
 }
 
 function AccountCard({ account, edit, onClickLightning, onClickNostr }: AccountCardProps) {
+  const subLnpassId = useMemo(() => {
+    if (account.hdKey.privateKey === null) return
+    return seedToLnpassId(account.hdKey.privateKey)
+  }, [account])
+
   return (
     <Card>
       <div className="flex flex-row items-center">
@@ -32,19 +44,29 @@ function AccountCard({ account, edit, onClickLightning, onClickNostr }: AccountC
         <div className="text-slate-500">{account.description}</div>
       </div>
 
-      <div className="flex gap-2">
-        {onClickLightning && (
-          <Button gradientDuoTone="tealToLime" outline={true} onClick={() => onClickLightning(account)}>
-            <BoltIcon className="h-6 w-6 mr-3" />
-            Login with Lightning
-          </Button>
-        )}
-        {onClickNostr && (
-          <Button gradientDuoTone="cyanToBlue" outline={true} onClick={() => onClickNostr(account)}>
-            <KeyIcon className="h-6 w-6 mr-3" />
-            Nostr Keys
-          </Button>
-        )}
+      <div className="flex gap-2 justify-between items-center">
+        <div className="flex gap-2">
+          {onClickLightning && (
+            <Button gradientDuoTone="tealToLime" outline={true} onClick={() => onClickLightning(account)}>
+              <BoltIcon className="h-6 w-6 mr-3" />
+              Login with Lightning
+            </Button>
+          )}
+          {onClickNostr && (
+            <Button gradientDuoTone="cyanToBlue" outline={true} onClick={() => onClickNostr(account)}>
+              <KeyIcon className="h-6 w-6 mr-3" />
+              Nostr Keys
+            </Button>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <a href={`/#/login#${subLnpassId}`} target="_blank" rel="noreferrer">
+            <Button size="xs" gradientDuoTone="pinkToOrange" outline={true}>
+              <ArrowTopRightOnSquareIcon className="h-6 w-6 mr-3" />
+              Lnpass
+            </Button>
+          </a>
+        </div>
       </div>
     </Card>
   )

@@ -20,10 +20,11 @@ export type NostrPrivateKey = {
 
 const PUBKEY_LIMIT = NOSTR_PUBLIC_KEY_PREFIX.length + 7 + 128
 const PRVKEY_LIMIT = NOSTR_PRIVATE_KEY_PREFIX.length + 7 + 128
+const NIP06_DERIVATION_PATH = `m/44'/1237'/0'/0/0`
 
 // https://github.com/nostr-protocol/nips/blob/master/06.md
 const deriveNostrKey = (masterKey: HDKey): HDKey => {
-  return masterKey.derive(`m/44'/1237'/0'/0/0`)
+  return masterKey.derive(NIP06_DERIVATION_PATH)
 }
 
 export const toNostrPublicKey = (publicKey: Uint8Array): NostrPublicKey => {
