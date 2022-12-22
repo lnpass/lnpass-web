@@ -1,5 +1,5 @@
-import { Label, ModalProps, TextInput } from 'flowbite-react'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { Label, ModalProps, TextInput, ToggleSwitch } from 'flowbite-react'
 import { deriveNostrPrivateKey, deriveNostrPublicKey } from '../utils/nostr'
 import { InfoModal } from './InfoModal'
 
@@ -8,6 +8,8 @@ interface NostrKeysModalProps extends ModalProps {
 }
 
 export function NostrKeysModal({ account, show, onClose, children, ...props }: NostrKeysModalProps) {
+  const [showAsHex, setShowAsHex] = useState(false)
+
   const nostrPublicKey = useMemo(() => {
     if (account.hdKey.publicKey === null) return
     return deriveNostrPublicKey(account.hdKey)
@@ -24,33 +26,72 @@ export function NostrKeysModal({ account, show, onClose, children, ...props }: N
 
   return (
     <InfoModal title="Nostr Keys" show={show} onClose={onClose} {...props}>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 mb-8">
         {nostrPublicKey && (
-          <div>
-            <div className="mb-2 block">
-              <Label htmlFor="pubkey" value="Public Key" className="font-bold" />
-            </div>
-            <TextInput
-              id="pubkey"
-              placeholder="npub1..."
-              readOnly={true}
-              value={nostrPublicKey || 'Public Key not available'}
-            />
+          <div className="flex flex-col gap-2">
+            {showAsHex ? (
+              <>
+                <div className="block">
+                  <Label htmlFor="pubkeyHex" value="Public Key (hex)" className="font-bold" />
+                </div>
+                <TextInput
+                  id="pubkeyHex"
+                  placeholder="0x..."
+                  readOnly={true}
+                  addon="npub1"
+                  value={nostrPublicKey.hex}
+                />
+              </>
+            ) : (
+              <>
+                <div className="block">
+                  <Label htmlFor="pubkey" value="Public Key" className="font-bold" />
+                </div>
+                <TextInput
+                  id="pubkey"
+                  placeholder="npub1..."
+                  readOnly={true}
+                  addon="npub1"
+                  value={nostrPublicKey.nip19}
+                />
+              </>
+            )}
           </div>
         )}
         {nostrPrivateKey && (
-          <div>
-            <div className="mb-2 block font-bold">
-              <Label htmlFor="privkey" value="Private Key" className="font-bold" />
-            </div>
-            <TextInput
-              id="privkey"
-              placeholder="nsec1..."
-              readOnly={true}
-              value={nostrPrivateKey || 'Private Key not available'}
-            />
+          <div className="flex flex-col gap-2">
+            {showAsHex ? (
+              <>
+                <div className="block">
+                  <Label htmlFor="privkeyHex" value="Private Key (hex)" className="font-bold" />
+                </div>
+                <TextInput
+                  id="privkeyHex"
+                  placeholder="0x..."
+                  readOnly={true}
+                  addon="nsec1"
+                  value={nostrPrivateKey.hex}
+                />
+              </>
+            ) : (
+              <>
+                <div className="block">
+                  <Label htmlFor="privkey" value="Private Key" className="font-bold" />
+                </div>
+                <TextInput
+                  id="privkey"
+                  placeholder="nsec1..."
+                  readOnly={true}
+                  addon="nsec1"
+                  value={nostrPrivateKey.nip19}
+                />
+              </>
+            )}
           </div>
         )}
+      </div>
+      <div>
+        <ToggleSwitch checked={showAsHex} label="Show as hex" onChange={() => setShowAsHex((current) => !current)} />
       </div>
     </InfoModal>
   )
