@@ -1,18 +1,20 @@
 import { useMemo, useState } from 'react'
 import { Button, Card, Tooltip } from 'flowbite-react'
-import { ArrowRightIcon, UserPlusIcon, PencilSquareIcon, BoltIcon } from '@heroicons/react/24/solid'
+import { ArrowRightIcon, UserPlusIcon, PencilSquareIcon, BoltIcon, KeyIcon } from '@heroicons/react/24/solid'
 import { HDKey } from '@scure/bip32'
 import { LnpassId, lnpassIdToSeed } from './utils/lnpassId'
 import { AccountEditModal } from './AccountEditModal'
 import { LightningLoginModal } from './LightningLoginModal'
+import { NostrKeysModal } from './components/NostrKeysModal'
 
 interface AccountCardProps {
   account: Account
   edit: (account: Account) => void
-  loginWithLightning: (account: Account) => void
+  onClickLightning?: (account: Account) => void
+  onClickNostr?: (account: Account) => void
 }
 
-function AccountCard({ account, edit, loginWithLightning }: AccountCardProps) {
+function AccountCard({ account, edit, onClickLightning, onClickNostr }: AccountCardProps) {
   return (
     <Card>
       <div className="flex flex-row items-center">
@@ -30,11 +32,19 @@ function AccountCard({ account, edit, loginWithLightning }: AccountCardProps) {
         <div className="text-slate-500">{account.description}</div>
       </div>
 
-      <div className="w-64">
-        <Button gradientDuoTone="purpleToBlue" onClick={() => loginWithLightning(account)}>
-          <BoltIcon className="h-6 w-6 mr-3" />
-          Login with Lightning
-        </Button>
+      <div className="flex gap-2">
+        {onClickLightning && (
+          <Button gradientDuoTone="tealToLime" outline={true} onClick={() => onClickLightning(account)}>
+            <BoltIcon className="h-6 w-6 mr-3" />
+            Login with Lightning
+          </Button>
+        )}
+        {onClickNostr && (
+          <Button gradientDuoTone="cyanToBlue" outline={true} onClick={() => onClickNostr(account)}>
+            <KeyIcon className="h-6 w-6 mr-3" />
+            Nostr Keys
+          </Button>
+        )}
       </div>
     </Card>
   )
@@ -57,7 +67,8 @@ export function IdentitiesPage({ lnpassId }: IdentitiesPageProps) {
     }
   }
   const [accounts, setAccounts] = useState<Account[]>([])
-  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [showLightningLoginModal, setShowLightningLoginModal] = useState(false)
+  const [showNostrModal, setShowNostrModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
 
@@ -112,8 +123,13 @@ export function IdentitiesPage({ lnpassId }: IdentitiesPageProps) {
               <>
                 <LightningLoginModal
                   account={selectedAccount}
-                  show={showLoginModal}
-                  onClose={() => setShowLoginModal(false)}
+                  show={showLightningLoginModal}
+                  onClose={() => setShowLightningLoginModal(false)}
+                />
+                <NostrKeysModal
+                  account={selectedAccount}
+                  show={showNostrModal}
+                  onClose={() => setShowNostrModal(false)}
                 />
                 <AccountEditModal
                   account={selectedAccount}
@@ -135,9 +151,13 @@ export function IdentitiesPage({ lnpassId }: IdentitiesPageProps) {
                     setSelectedAccount(account)
                     setShowEditModal(true)
                   }}
-                  loginWithLightning={(account) => {
+                  onClickLightning={(account) => {
                     setSelectedAccount(account)
-                    setShowLoginModal(true)
+                    setShowLightningLoginModal(true)
+                  }}
+                  onClickNostr={(account) => {
+                    setSelectedAccount(account)
+                    setShowNostrModal(true)
                   }}
                 />
               </div>
