@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button, Card, Tooltip } from 'flowbite-react'
 import {
   ArrowRightIcon,
@@ -9,12 +9,25 @@ import {
   ArrowTopRightOnSquareIcon,
 } from '@heroicons/react/24/solid'
 import { HDKey } from '@scure/bip32'
+import { sha256 } from '@noble/hashes/sha256'
+import { bytesToHex } from '@noble/hashes/utils'
+
 import { LnpassId, lnpassIdToSeed, seedToLnpassId } from './utils/lnpassId'
 import { AccountEditModal } from './AccountEditModal'
 import { LightningLoginModal } from './LightningLoginModal'
 import { NostrKeysModal } from './components/NostrKeysModal'
 import { lnpassAccountDerivationPath } from './utils/lnpass'
 import { deriveEntropy } from './utils/bip85'
+import { useNostrStorageContext } from './contexts/NostrStorageContext'
+import { deriveNostrPrivateKey, deriveNostrPublicKey } from './utils/nostr'
+import {
+  getEventHash,
+  signEvent,
+  nip04
+} from 'nostr-tools'
+
+const LNPASS_NOSTR_EVENT_KIND = 10001 // replaceable
+const LNPASS_NOSTR_EVENT_REF = bytesToHex(sha256('lnpass'))
 
 interface AccountCardProps {
   account: Account
@@ -83,16 +96,30 @@ function AccountCard({ account, edit, generateLoginHref, onClickLightning, onCli
   )
 }
 
+interface NostrAccountView {
+  name: string
+  description: string
+  path: string
+  deleted: boolean
+}
+
+interface NostrExportData {
+  version: string
+  accounts: NostrAccountView[]
+}
+
 interface IdentitiesPageProps {
   lnpassId: LnpassId
   generateLoginHref: (LnpassId: LnpassId) => string
 }
 
 export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPageProps) {
+  const nostrStorage = useNostrStorageContext()
+
   const seed = useMemo(() => lnpassIdToSeed(lnpassId), [lnpassId])
   const masterKey = useMemo(() => HDKey.fromMasterSeed(seed), [seed])
 
-  const toAccount = (parentKey: HDKey, path: string): Account => {
+  const createNewAccount = (parentKey: HDKey, path: string): Account => {
     const hdKey = parentKey.derive(path)
     return {
       name: `Identity #${hdKey.index}`,
@@ -110,15 +137,88 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
   const addNewAccount = () => {
     const newAccount = (() => {
       if (accounts.length === 0) {
-        return toAccount(masterKey, lnpassAccountDerivationPath(0))
+        return createNewAccount(masterKey, lnpassAccountDerivationPath(0))
       } else {
         const lastAccount = accounts[accounts.length - 1]
-        return toAccount(masterKey, lnpassAccountDerivationPath(lastAccount.hdKey.index + 1))
+        return createNewAccount(masterKey, lnpassAccountDerivationPath(lastAccount.hdKey.index + 1))
       }
     })()
 
     setAccounts((current) => [...current, newAccount])
   }
+
+  const nostrPublicKey = useMemo(() =>  deriveNostrPublicKey(masterKey), [masterKey])
+  const nostrPrivateKey = useMemo(() => deriveNostrPrivateKey(masterKey), [masterKey])
+
+  useEffect(() => {
+    const abortCtrl = new AbortController()
+    nostrStorage.pullSingle('ws://localhost:7000', [{
+      kinds: [LNPASS_NOSTR_EVENT_KIND],
+      authors: [nostrPublicKey.hex],
+      '#e': [LNPASS_NOSTR_EVENT_REF]
+    }], abortCtrl.signal).then((event) => {
+      if (event === null) return
+      console.debug('Nostr incoming event', event)
+      return nip04.decrypt(nostrPrivateKey.hex, nostrPublicKey.hex, event.content)
+        .then((content) => JSON.parse(content) as NostrExportData)
+        .then((data) =>  {
+          if (abortCtrl.signal.aborted) return
+          console.log('Found stored account data', data)
+        })
+      }).catch((err) => {
+        console.warn('Error while fetching event from nostr', err)
+      })
+
+    return () => {
+      abortCtrl.abort()
+    }
+  }, [nostrStorage, nostrPrivateKey, nostrPublicKey])
+
+  useEffect(() => {
+    if (accounts.length === 0) return
+
+    const abortCtrl = new AbortController()
+
+    const data: NostrExportData = {
+      version: '1',
+      accounts: accounts.map((it) => {
+        return {
+          name: it.name,
+          description: it.description,
+          path: it.path,
+          deleted: false
+        } as NostrAccountView
+      })
+    }
+
+    nip04.encrypt( nostrPrivateKey.hex, nostrPublicKey.hex, JSON.stringify(data))
+      .then((ciphertext) => {
+        if (abortCtrl.signal.aborted) return
+        let event = {
+          id: '',
+          sig: '',
+          kind: LNPASS_NOSTR_EVENT_KIND,
+          pubkey: nostrPublicKey.hex,
+          created_at: Math.floor(Date.now() / 1000),
+          tags: [
+            ['e', LNPASS_NOSTR_EVENT_REF]
+          ],
+          content: ciphertext
+        }
+        event.id = getEventHash(event)
+        event.sig = signEvent(event, nostrPrivateKey.hex)
+        
+        return nostrStorage.pushSingle('ws://localhost:7000', event, abortCtrl.signal).then((event) => {
+          console.debug('Nostr outgoing event', event)
+        })
+      }).catch((err) => {
+        console.warn('Error while pushing event to nostr', err)
+      })
+
+    return () => {
+      abortCtrl.abort()
+    }
+  }, [accounts, nostrStorage, nostrPublicKey, nostrPrivateKey])
 
   return (
     <>

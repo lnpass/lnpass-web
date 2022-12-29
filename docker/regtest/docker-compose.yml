@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+
+  # https://github.com/scsibug/nostr-rs-relay
+  relay:
+    image: scsibug/nostr-rs-relay:latest
+    container_name: lnpass_regtest_relay
+    restart: unless-stopped
+    ports:
+      - "7000:8080"

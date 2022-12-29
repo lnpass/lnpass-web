@@ -1,4 +1,5 @@
 import { bytesToHex } from '@noble/hashes/utils'
+import { schnorr } from '@noble/secp256k1'
 import { HDKey } from '@scure/bip32'
 import { bech32 } from 'bech32'
 
@@ -48,10 +49,10 @@ export const toNostrPrivateKey = (privateKey: Uint8Array): NostrPrivateKey => {
 
 export const deriveNostrPublicKey = (masterKey: HDKey): NostrPublicKey => {
   const key = deriveNostrKey(masterKey)
-  if (key.publicKey === null) {
+  if (key.privateKey === null) {
     throw new Error('Public Key not avialable')
   }
-  return toNostrPublicKey(key.publicKey)
+  return toNostrPublicKey(schnorr.getPublicKey(key.privateKey))
 }
 
 export const deriveNostrPrivateKey = (masterKey: HDKey): NostrPrivateKey => {
