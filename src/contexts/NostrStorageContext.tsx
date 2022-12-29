@@ -1,15 +1,5 @@
-
 import { ProviderProps, createContext, useContext, useCallback } from 'react'
-import {
-  relayInit,
-  generatePrivateKey,
-  getPublicKey,
-  getEventHash,
-  signEvent,
-  Event,
-  Sub,
-  Filter
-} from 'nostr-tools'
+import { relayInit, generatePrivateKey, getPublicKey, getEventHash, signEvent, Event, Sub, Filter } from 'nostr-tools'
 
 interface NostrStorageContextEntry {
   pullSingle: (host: string, filters: Filter[], signal: AbortSignal) => Promise<Event | null>
@@ -19,7 +9,6 @@ interface NostrStorageContextEntry {
 const NostrStorageContext = createContext<NostrStorageContextEntry | undefined>(undefined)
 
 const NostrStorageProvider = ({ children }: ProviderProps<{}>) => {
-
   const pullSingle = useCallback((host: string, filters: Filter[], signal: AbortSignal) => {
     return new Promise<Event | null>(async (resolve, reject) => {
       const relay = relayInit(host)
@@ -50,7 +39,7 @@ const NostrStorageProvider = ({ children }: ProviderProps<{}>) => {
         console.log(`failed to connect to ${relay.url}`)
         cleanUp(() => reject())
       })
-    
+
       sub = relay.sub(filters)
       sub.on('event', (event: any) => {
         console.log('<- event:', event)
@@ -92,7 +81,7 @@ const NostrStorageProvider = ({ children }: ProviderProps<{}>) => {
       })
     })
   }, [])
-  
+
   return (
     <NostrStorageContext.Provider value={{ pullSingle, pushSingle }}>
       <>{children}</>

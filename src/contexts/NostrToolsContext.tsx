@@ -1,9 +1,8 @@
-
 import { ProviderProps, createContext, useContext } from 'react'
 import * as nostrTools from 'nostr-tools'
 
 interface NostrToolsContextEntry {
- nostrTools: any
+  nostrTools: any
 }
 
 const NostrToolsContext = createContext<NostrToolsContextEntry | undefined>(undefined)
