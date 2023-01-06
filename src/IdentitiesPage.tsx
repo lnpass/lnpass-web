@@ -21,6 +21,7 @@ import { deriveEntropy } from './utils/bip85'
 import { useNostrStorageContext } from './contexts/NostrStorageContext'
 import { deriveNostrPrivateKey, deriveNostrPublicKey } from './utils/nostr'
 import { getEventHash, signEvent, nip04 } from 'nostr-tools'
+import { useAccountsContext } from './contexts/AccountsContext'
 
 const LNPASS_NOSTR_EVENT_KIND = 10001 // replaceable
 const LNPASS_NOSTR_EVENT_REF = bytesToHex(sha256('lnpass'))
@@ -121,37 +122,16 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
   const seed = useMemo(() => lnpassIdToSeed(lnpassId), [lnpassId])
   const masterKey = useMemo(() => HDKey.fromMasterSeed(seed), [seed])
 
-  const createNewAccount = (parentKey: HDKey, path: string): Account => {
-    const hdKey = parentKey.derive(path)
-    return {
-      name: `Identity #${hdKey.index}`,
-      path,
-      hdKey,
-    }
-  }
-  const [accounts, setAccounts] = useState<Account[]>([])
+  const {
+    accounts,
+    addNewAccount,
+    restoreAccount,
+  } = useAccountsContext()
+
   const [showLightningLoginModal, setShowLightningLoginModal] = useState(false)
   const [showNostrModal, setShowNostrModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
-
-  const restoreAccount = (path: string, partial?: Partial<Account>) => {
-    return { ...createNewAccount(masterKey, path), ...partial }
-  }
-
-  // TODO: should get entropy via https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki
-  const addNewAccount = useCallback(() => {
-    const newAccount = (() => {
-      if (accounts.length === 0) {
-        return restoreAccount(lnpassAccountDerivationPath(0))
-      } else {
-        const lastAccount = accounts[accounts.length - 1]
-        return restoreAccount(lnpassAccountDerivationPath(lastAccount.hdKey.index + 1))
-      }
-    })()
-
-    setAccounts((current) => [...current, newAccount])
-  }, [accounts])
 
   const nostrPublicKey = useMemo(() => deriveNostrPublicKey(masterKey), [masterKey])
   const nostrPrivateKey = useMemo(() => deriveNostrPrivateKey(masterKey), [masterKey])
@@ -199,7 +179,7 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
   }, [nostrStorage, nostrPrivateKey, nostrPublicKey])
 
   useEffect(() => {
-    if (accounts.length === 0) return
+    if (!accounts || accounts.length === 0) return
 
     const abortCtrl = new AbortController()
 
@@ -247,10 +227,9 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
   useEffect(() => {
     if (!nostrStorageData) return
 
-    const restoredAccounts = nostrStorageData.accounts.map((it) => {
+    nostrStorageData.accounts.map((it) => {
       return restoreAccount(it.path, it)
     })
-    setAccounts(restoredAccounts)
   }, [nostrStorageData])
 
   return (
@@ -260,7 +239,7 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
       <>{!isInitialized && <>Loading...</>}</>
 
       <div className="mt-2 mb-4">
-        {accounts.length === 0 ? (
+        {!accounts || accounts.length === 0 ? (
           <div className="cursor-pointer" onClick={() => addNewAccount()}>
             <Card>
               <div className="flex flex-row items-center gap-4">

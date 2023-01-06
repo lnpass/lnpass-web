@@ -19,6 +19,7 @@ import { Sidebar } from './Sidebar'
 import './App.css'
 import { MobileMenuBar } from './MobileMenuBar'
 import { BackupPage } from './BackupPage'
+import { AccountsProvider } from './contexts/AccountsContext'
 
 /* Using HashRouter for GitHub Pages compatibility */
 const USE_HASH_ROUTER = true
@@ -34,7 +35,11 @@ function Index({ lnpassId, generateLoginHref }: IndexProps) {
   if (!lnpassId) {
     return <Navigate to={ROUTES.login} replace={true} />
   } else {
-    return <IdentitiesPage lnpassId={lnpassId} generateLoginHref={generateLoginHref} />
+    return <>
+      <AccountsProvider value={{ lnpassId }}>
+        <IdentitiesPage lnpassId={lnpassId} generateLoginHref={generateLoginHref} />
+      </AccountsProvider>
+    </>
   }
 }
 
