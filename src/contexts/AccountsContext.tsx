@@ -5,8 +5,10 @@ import { LnpassId, lnpassIdToSeed } from '../utils/lnpassId'
 
 interface AccountsContextEntry {
   accounts?: Account[]
+  clearAccounts: () => void
   addNewAccount: () => void
   restoreAccount: (path: string, partial?: Partial<Account>) => void
+  updateAccount: (account: Account) => void
 }
 
 const createNewAccount = (parentKey: HDKey, path: string): Account => {
@@ -51,7 +53,7 @@ const AccountsProvider = ({ value: { lnpassId }, children }: ProviderProps<Accou
   // TODO: should get entropy via https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki
   const addNewAccount = useCallback(() => {
     if (masterKey === undefined) {
-      throw new Error('Cannot add account: Key not available')
+      throw new Error('Illegal state: Key not available')
     }
 
     setAccounts((current) => {
@@ -62,7 +64,7 @@ const AccountsProvider = ({ value: { lnpassId }, children }: ProviderProps<Accou
   const restoreAccount = useCallback(
     (path: string, partial?: Partial<Account>) => {
       if (masterKey === undefined) {
-        throw new Error('Cannot add account: Key not available')
+        throw new Error('Illegal state: Key not available')
       }
 
       setAccounts((current) => {
@@ -72,12 +74,31 @@ const AccountsProvider = ({ value: { lnpassId }, children }: ProviderProps<Accou
     [masterKey]
   )
 
+  const updateAccount = useCallback(
+    (account: Account) => {
+      if (masterKey === undefined) {
+        throw new Error('Illegal state: Key not available')
+      }
+
+      setAccounts((current) => {
+        if (current === undefined) return undefined
+        const other = current.filter((it) => it.path !== account.path)
+        return [...other, account]
+      })
+    },
+    [masterKey]
+  )
+
+  const clearAccounts = useCallback(() => setAccounts([]), [])
+
   return (
     <AccountsContext.Provider
       value={{
         accounts,
+        clearAccounts,
         addNewAccount,
         restoreAccount,
+        updateAccount,
       }}
     >
       <>{children}</>

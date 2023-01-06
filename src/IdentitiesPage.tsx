@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Card, Tooltip } from 'flowbite-react'
+import { Button, Card, Spinner, Tooltip } from 'flowbite-react'
 import { ArrowRightIcon, UserPlusIcon } from '@heroicons/react/24/solid'
 import { HDKey } from '@scure/bip32'
 import { sha256 } from '@noble/hashes/sha256'
@@ -9,14 +9,83 @@ import { LnpassId, lnpassIdToSeed } from './utils/lnpassId'
 import { AccountEditModal } from './AccountEditModal'
 import { LightningLoginModal } from './LightningLoginModal'
 import { NostrKeysModal } from './components/NostrKeysModal'
-import { useNostrStorageContext } from './contexts/NostrStorageContext'
+import { NostrStorageContextEntry, useNostrStorageContext } from './contexts/NostrStorageContext'
 import { deriveNostrPrivateKey, deriveNostrPublicKey } from './utils/nostr'
 import { getEventHash, signEvent, nip04 } from 'nostr-tools'
 import { useAccountsContext } from './contexts/AccountsContext'
 import { AccountCard } from './components/AccountCard'
+import { Event } from 'nostr-tools'
 
-const LNPASS_NOSTR_EVENT_KIND = 10001 // replaceable
+const LNPASS_NOSTR_EVENT_KIND = 10_001 // replaceable
 const LNPASS_NOSTR_EVENT_REF = bytesToHex(sha256('lnpass'))
+
+const toNostrKeys = (lnpassId: LnpassId) => {
+  const seed = lnpassIdToSeed(lnpassId)
+  const masterKey = HDKey.fromMasterSeed(seed)
+  const nostrPublicKey = deriveNostrPublicKey(masterKey)
+  const nostrPrivateKey = deriveNostrPrivateKey(masterKey)
+  return [nostrPublicKey, nostrPrivateKey]
+}
+
+const pullDataFromNostr = (
+  lnpassId: LnpassId,
+  host: string,
+  nostrStorage: NostrStorageContextEntry,
+  signal: AbortSignal
+): Promise<NostrExportData | null> => {
+  const [nostrPublicKey, nostrPrivateKey] = toNostrKeys(lnpassId)
+
+  return nostrStorage
+    .pullSingle(
+      host,
+      [
+        {
+          kinds: [LNPASS_NOSTR_EVENT_KIND],
+          authors: [nostrPublicKey.hex],
+          '#e': [LNPASS_NOSTR_EVENT_REF],
+        },
+      ],
+      signal
+    )
+    .then((event) => {
+      if (event === null) {
+        return null
+      }
+      console.debug('Nostr incoming event', event)
+      return nip04
+        .decrypt(nostrPrivateKey.hex, nostrPublicKey.hex, event.content)
+        .then((content) => JSON.parse(content) as NostrExportData)
+    })
+}
+
+const pushDataFromNostr = (
+  lnpassId: LnpassId,
+  host: string,
+  nostrStorage: NostrStorageContextEntry,
+  signal: AbortSignal,
+  data: NostrExportData
+): Promise<Event> => {
+  const [nostrPublicKey, nostrPrivateKey] = toNostrKeys(lnpassId)
+
+  return nip04.encrypt(nostrPrivateKey.hex, nostrPublicKey.hex, JSON.stringify(data)).then((ciphertext) => {
+    if (signal.aborted) {
+      throw new Error('Pushing to nostr has been aborted')
+    }
+    let event = {
+      id: '',
+      sig: '',
+      kind: LNPASS_NOSTR_EVENT_KIND,
+      pubkey: nostrPublicKey.hex,
+      created_at: Math.floor(Date.now() / 1000),
+      tags: [['e', LNPASS_NOSTR_EVENT_REF]],
+      content: ciphertext,
+    }
+    event.id = getEventHash(event)
+    event.sig = signEvent(event, nostrPrivateKey.hex)
+
+    return nostrStorage.pushSingle(host, event, signal)
+  })
+}
 
 interface NostrAccountView {
   name: string
@@ -36,75 +105,28 @@ interface IdentitiesPageProps {
 }
 
 export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPageProps) {
+  const { accounts, addNewAccount, restoreAccount, updateAccount, clearAccounts } = useAccountsContext()
+
   const nostrStorage = useNostrStorageContext()
-  const [nostrStorageData, setNostrStorageData] = useState<NostrExportData>()
-  const [nostrStorageError, setNostrStorageError] = useState<unknown>()
 
-  const isInitialized = useMemo(() => {
-    return !!nostrStorageData || !!nostrStorageError
-  }, [nostrStorageData, nostrStorageError])
+  const [isNostrStoragePulling, setIsNostrStoragePulling] = useState<boolean>(false)
+  const [isNostrStoragePushing, setIsNostrStoragePushing] = useState<boolean>(false)
+  const isNostrStorageLoading = useMemo(
+    () => isNostrStoragePulling || isNostrStoragePushing,
+    [isNostrStoragePulling, isNostrStoragePushing]
+  )
+  const [nostrStorageIncomingData, setNostrStorageIncomingData] = useState<NostrExportData>()
+  const [nostrStorageIncomingError, setNostrStorageIncomingError] = useState<unknown>()
 
-  const seed = useMemo(() => lnpassIdToSeed(lnpassId), [lnpassId])
-  const masterKey = useMemo(() => HDKey.fromMasterSeed(seed), [seed])
+  const nostrNeedsInitialSync = useMemo(() => {
+    if (nostrStorageIncomingData === undefined) return true
+    return nostrStorageIncomingError !== undefined
+  }, [nostrStorageIncomingData, nostrStorageIncomingError])
+  // sync `accounts => nostr (outgoing)`
+  const nostrStorageOutgoingData = useMemo(() => {
+    if (!accounts) return
 
-  const { accounts, addNewAccount, restoreAccount } = useAccountsContext()
-
-  const [showLightningLoginModal, setShowLightningLoginModal] = useState(false)
-  const [showNostrModal, setShowNostrModal] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
-
-  const nostrPublicKey = useMemo(() => deriveNostrPublicKey(masterKey), [masterKey])
-  const nostrPrivateKey = useMemo(() => deriveNostrPrivateKey(masterKey), [masterKey])
-
-  useEffect(() => {
-    const abortCtrl = new AbortController()
-    nostrStorage
-      .pullSingle(
-        'ws://localhost:7000',
-        [
-          {
-            kinds: [LNPASS_NOSTR_EVENT_KIND],
-            authors: [nostrPublicKey.hex],
-            '#e': [LNPASS_NOSTR_EVENT_REF],
-          },
-        ],
-        abortCtrl.signal
-      )
-      .then((event) => {
-        if (event === null) {
-          setNostrStorageData({
-            version: '1',
-            accounts: [],
-          })
-          return
-        }
-        console.debug('Nostr incoming event', event)
-        return nip04
-          .decrypt(nostrPrivateKey.hex, nostrPublicKey.hex, event.content)
-          .then((content) => JSON.parse(content) as NostrExportData)
-          .then((data) => {
-            if (abortCtrl.signal.aborted) return
-            console.log('Found stored account data', data)
-            setNostrStorageData(data)
-          })
-      })
-      .catch((err) => {
-        console.warn('Error while fetching event from nostr', err)
-        setNostrStorageError(err)
-      })
-
-    return () => {
-      abortCtrl.abort()
-    }
-  }, [nostrStorage, nostrPrivateKey, nostrPublicKey])
-
-  useEffect(() => {
-    if (!accounts || accounts.length === 0) return
-
-    const abortCtrl = new AbortController()
-
-    const data: NostrExportData = {
+    return {
       version: '1',
       accounts: accounts.map((it) => {
         return {
@@ -114,85 +136,171 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
           deleted: false,
         } as NostrAccountView
       }),
-    }
+    } as NostrExportData
+  }, [accounts])
 
-    nip04
-      .encrypt(nostrPrivateKey.hex, nostrPublicKey.hex, JSON.stringify(data))
-      .then((ciphertext) => {
-        if (abortCtrl.signal.aborted) return
-        let event = {
-          id: '',
-          sig: '',
-          kind: LNPASS_NOSTR_EVENT_KIND,
-          pubkey: nostrPublicKey.hex,
-          created_at: Math.floor(Date.now() / 1000),
-          tags: [['e', LNPASS_NOSTR_EVENT_REF]],
-          content: ciphertext,
-        }
-        event.id = getEventHash(event)
-        event.sig = signEvent(event, nostrPrivateKey.hex)
+  const needsNostrPush = useMemo(() => {
+    if (!nostrStorageIncomingData) return false
+    if (!nostrStorageOutgoingData) return false
+    return JSON.stringify(nostrStorageIncomingData) !== JSON.stringify(nostrStorageOutgoingData)
+  }, [nostrStorageIncomingData, nostrStorageOutgoingData])
 
-        return nostrStorage.pushSingle('ws://localhost:7000', event, abortCtrl.signal).then((event) => {
-          console.debug('Nostr outgoing event', event)
+  const [showLightningLoginModal, setShowLightningLoginModal] = useState(false)
+  const [showNostrModal, setShowNostrModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
+
+  // sync `nostr (incoming) => accounts`
+  useEffect(() => {
+    if (!nostrStorageIncomingData) return
+
+    clearAccounts()
+    nostrStorageIncomingData.accounts.map((it) => {
+      return restoreAccount(it.path, it)
+    })
+  }, [nostrStorageIncomingData, restoreAccount, clearAccounts])
+
+  const syncAccountsFromNostr = useCallback(
+    ({ signal }: { signal: AbortSignal }) => {
+      setIsNostrStoragePulling(true)
+      return pullDataFromNostr(lnpassId, 'ws://localhost:7000', nostrStorage, signal)
+        .then(
+          (data) =>
+            data || {
+              version: '1',
+              accounts: [],
+            }
+        )
+        .then((data) => {
+          if (signal.aborted) return
+          setNostrStorageIncomingError(undefined)
+          setNostrStorageIncomingData(data)
         })
-      })
-      .catch((err) => {
-        console.warn('Error while pushing event to nostr', err)
-      })
+        .catch((err) => {
+          console.warn('Error while fetching event from nostr', err)
+
+          if (signal.aborted) return
+          setNostrStorageIncomingError(err)
+        })
+        .finally(() => {
+          if (signal.aborted) return
+          setIsNostrStoragePulling(false)
+        })
+    },
+    [lnpassId, nostrStorage]
+  )
+
+  const syncAccountsToNostr = useCallback(
+    ({ signal }: { signal: AbortSignal }) => {
+      if (!nostrStorageOutgoingData) return
+
+      setIsNostrStoragePushing(true)
+
+      pushDataFromNostr(lnpassId, 'ws://localhost:7000', nostrStorage, signal, nostrStorageOutgoingData)
+        .then((event) => {
+          console.debug('Nostr outgoing event', event)
+
+          if (signal.aborted) return
+          setIsNostrStoragePushing(false)
+          return syncAccountsFromNostr({ signal })
+        })
+        .catch((err) => {
+          console.warn('Error while pushing event to nostr', err)
+
+          if (signal.aborted) return
+          setIsNostrStoragePushing(false)
+        })
+    },
+    [lnpassId, nostrStorage, nostrStorageOutgoingData, syncAccountsFromNostr]
+  )
+
+  // initialize by pulling data from nostr
+  useEffect(() => {
+    if (!nostrNeedsInitialSync) return
+    const abortCtrl = new AbortController()
+    syncAccountsFromNostr({ signal: abortCtrl.signal })
 
     return () => {
       abortCtrl.abort()
     }
-  }, [accounts, nostrStorage, nostrPublicKey, nostrPrivateKey])
-
-  useEffect(() => {
-    if (!nostrStorageData) return
-
-    nostrStorageData.accounts.map((it) => {
-      return restoreAccount(it.path, it)
-    })
-  }, [nostrStorageData])
-
-  const restoreAccountsFromNostr = useCallback(() => {}, [])
+  }, [nostrNeedsInitialSync, syncAccountsFromNostr])
 
   return (
     <>
       <h2 className="text-3xl font-bold tracking-tighter">Identities</h2>
 
-      <>{!isInitialized && <>Loading...</>}</>
+      {nostrStorageIncomingData && (
+        <div className="flex flex-row gap-2 justify-start items-center">
+          <Button
+            outline={true}
+            gradientDuoTone="purpleToBlue"
+            size="xs"
+            disabled={isNostrStoragePulling}
+            onClick={() => {
+              const abortCtrl = new AbortController()
+              syncAccountsFromNostr({ signal: abortCtrl.signal })
+            }}
+          >
+            {isNostrStoragePulling && (
+              <Spinner className="mr-2" color="purple" aria-label="Pulling from nostr" size="xs" />
+            )}{' '}
+            Sync from nostr
+          </Button>
+          <div>
+            <Button
+              outline={!needsNostrPush}
+              gradientDuoTone="purpleToBlue"
+              size="xs"
+              disabled={isNostrStoragePushing}
+              onClick={() => {
+                const abortCtrl = new AbortController()
+                syncAccountsToNostr({ signal: abortCtrl.signal })
+              }}
+            >
+              {isNostrStoragePushing && (
+                <Spinner className="mr-2" color="purple" aria-label="Pushing to nostr" size="xs" />
+              )}
+              Sync to nostr
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="mt-2 mb-4">
+        {}
         {!accounts || accounts.length === 0 ? (
-          <div className="flex flex-col gap-2 items-center">
-            <div className="cursor-pointer w-full" onClick={() => addNewAccount()}>
-              <Card>
-                <div className="flex flex-row items-center gap-4">
-                  <div className="text-3xl">👋</div>
-                  <div className="flex-1">
-                    <span>Hey there!</span>
-                    <p>Go ahead, create your first identity</p>
-                  </div>
-                  <div>
-                    <ArrowRightIcon className="h-8 w-8 text-purple-500" />
+          <>
+            {nostrNeedsInitialSync && isNostrStoragePulling ? (
+              <>
+                <div className="flex flex-col gap-2 justify-center items-center">
+                  <Spinner className="mr-2" color="purple" aria-label="Syncing from nostr" size="xl" />
+                  Syncing from nostr...
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-col gap-2 justify-center items-center">
+                  <div className="cursor-pointer w-full" onClick={() => addNewAccount()}>
+                    <Card>
+                      <div className="flex flex-row items-center gap-4">
+                        <div className="text-3xl">👋</div>
+                        <div className="flex-1">
+                          <span>Hey there!</span>
+                          <p>Go ahead, create your first identity</p>
+                        </div>
+                        <div>
+                          <ArrowRightIcon className="h-8 w-8 text-purple-500" />
+                        </div>
+                      </div>
+                    </Card>
                   </div>
                 </div>
-              </Card>
-            </div>
-
-            {/*<div className="flex justify-center">
-            <div className="text-sm">... or ...</div>
-          </div>
-          <div className="flex justify-center">
-            <Tooltip content="Restore from nostr">
-              <Button outline={true} gradientDuoTone="purpleToBlue" size="xl" onClick={() => restoreAccountsFromNostr()}>
-                <div className="text-xl">Restore from nostr</div>
-              </Button>
-            </Tooltip>
-        </div>*/}
-          </div>
+              </>
+            )}
+          </>
         ) : (
           <>
-            <div className="flex mb-4">
+            <div className="flex mb-4 justify-start">
               <Tooltip content="Let's go!">
                 <Button gradientDuoTone="purpleToBlue" onClick={() => addNewAccount()}>
                   <UserPlusIcon className="h-6 w-6 mr-3" />
@@ -214,13 +322,14 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
                 />
                 <AccountEditModal
                   account={selectedAccount}
+                  show={showEditModal}
+                  onClose={() => setShowEditModal(false)}
                   onSave={(info) => {
                     selectedAccount.name = info.name
                     selectedAccount.description = info.description
+                    updateAccount(selectedAccount)
                     setShowEditModal(false)
                   }}
-                  show={showEditModal}
-                  onClose={() => setShowEditModal(false)}
                 />
               </>
             )}
