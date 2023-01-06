@@ -40,7 +40,7 @@ interface AccountsProviderProps {
 const AccountsProvider = ({ value: { lnpassId }, children }: ProviderProps<AccountsProviderProps>) => {
   const seed = useMemo(() => lnpassId && lnpassIdToSeed(lnpassId), [lnpassId])
   const masterKey = useMemo(() => seed && HDKey.fromMasterSeed(seed), [seed])
-  
+
   const [accounts, setAccounts] = useState<Account[]>()
 
   useEffect(() => {
@@ -53,28 +53,33 @@ const AccountsProvider = ({ value: { lnpassId }, children }: ProviderProps<Accou
     if (masterKey === undefined) {
       throw new Error('Cannot add account: Key not available')
     }
-    
+
     setAccounts((current) => {
       return [...(current || []), createNextAccount(masterKey, current)]
     })
   }, [masterKey])
 
-  const restoreAccount = useCallback((path: string, partial?: Partial<Account>) => {
-    if (masterKey === undefined) {
-      throw new Error('Cannot add account: Key not available')
-    }
+  const restoreAccount = useCallback(
+    (path: string, partial?: Partial<Account>) => {
+      if (masterKey === undefined) {
+        throw new Error('Cannot add account: Key not available')
+      }
 
-    setAccounts((current) => {
-      return [...(current || []), createAccountWith(masterKey, path, partial)]
-    })
-  }, [masterKey])
+      setAccounts((current) => {
+        return [...(current || []), createAccountWith(masterKey, path, partial)]
+      })
+    },
+    [masterKey]
+  )
 
   return (
-    <AccountsContext.Provider value={{ 
-      accounts,
-      addNewAccount,
-      restoreAccount
-      }}>
+    <AccountsContext.Provider
+      value={{
+        accounts,
+        addNewAccount,
+        restoreAccount,
+      }}
+    >
       <>{children}</>
     </AccountsContext.Provider>
   )

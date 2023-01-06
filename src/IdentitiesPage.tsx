@@ -1,97 +1,22 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Card, Tooltip } from 'flowbite-react'
-import {
-  ArrowRightIcon,
-  UserPlusIcon,
-  PencilSquareIcon,
-  BoltIcon,
-  KeyIcon,
-  ArrowTopRightOnSquareIcon,
-} from '@heroicons/react/24/solid'
+import { ArrowRightIcon, UserPlusIcon } from '@heroicons/react/24/solid'
 import { HDKey } from '@scure/bip32'
 import { sha256 } from '@noble/hashes/sha256'
 import { bytesToHex } from '@noble/hashes/utils'
 
-import { LnpassId, lnpassIdToSeed, seedToLnpassId } from './utils/lnpassId'
+import { LnpassId, lnpassIdToSeed } from './utils/lnpassId'
 import { AccountEditModal } from './AccountEditModal'
 import { LightningLoginModal } from './LightningLoginModal'
 import { NostrKeysModal } from './components/NostrKeysModal'
-import { lnpassAccountDerivationPath } from './utils/lnpass'
-import { deriveEntropy } from './utils/bip85'
 import { useNostrStorageContext } from './contexts/NostrStorageContext'
 import { deriveNostrPrivateKey, deriveNostrPublicKey } from './utils/nostr'
 import { getEventHash, signEvent, nip04 } from 'nostr-tools'
 import { useAccountsContext } from './contexts/AccountsContext'
+import { AccountCard } from './components/AccountCard'
 
 const LNPASS_NOSTR_EVENT_KIND = 10001 // replaceable
 const LNPASS_NOSTR_EVENT_REF = bytesToHex(sha256('lnpass'))
-
-interface AccountCardProps {
-  account: Account
-  edit: (account: Account) => void
-  generateLoginHref?: (LnpassId: LnpassId) => string
-  onClickLightning?: (account: Account) => void
-  onClickNostr?: (account: Account) => void
-}
-
-function AccountCard({ account, edit, generateLoginHref, onClickLightning, onClickNostr }: AccountCardProps) {
-  const subLnpassId = useMemo(() => {
-    // just derive an lnpass id from the first "lnpass account" of this account
-    const entropy = deriveEntropy(account.hdKey, lnpassAccountDerivationPath(0))
-    return seedToLnpassId(entropy)
-  }, [account])
-
-  const subLnpassLoginHref = useMemo(() => {
-    if (!generateLoginHref) return
-    return generateLoginHref(subLnpassId)
-  }, [generateLoginHref, subLnpassId])
-
-  return (
-    <Card>
-      <div className="flex flex-row items-center">
-        <h6 className="text-xl font-bold tracking-tighter">{account.name}</h6>
-        <div className="flex flex-wrap ml-3">
-          <Button color="light" size="xs" outline={true} onClick={() => edit(account)}>
-            <PencilSquareIcon className="h-4 w-4 text-slate-500" />
-          </Button>
-        </div>
-      </div>
-      <div className="hidden">
-        <div className="text-xs text-slate-500">{account.path}</div>
-      </div>
-      <div className="">
-        <div className="text-slate-500">{account.description}</div>
-      </div>
-
-      <div className="flex gap-2 justify-between items-center">
-        <div className="flex gap-2">
-          {onClickLightning && (
-            <Button gradientDuoTone="tealToLime" outline={true} onClick={() => onClickLightning(account)}>
-              <BoltIcon className="h-6 w-6 mr-3" />
-              Login with Lightning
-            </Button>
-          )}
-          {onClickNostr && (
-            <Button gradientDuoTone="cyanToBlue" outline={true} onClick={() => onClickNostr(account)}>
-              <KeyIcon className="h-6 w-6 mr-3" />
-              Nostr Keys
-            </Button>
-          )}
-        </div>
-        {subLnpassLoginHref && (
-          <div className="flex gap-2">
-            <a href={subLnpassLoginHref} target="_blank" rel="noreferrer">
-              <Button size="xs" gradientDuoTone="pinkToOrange" outline={true}>
-                <ArrowTopRightOnSquareIcon className="h-6 w-6 mr-3" />
-                lnpass
-              </Button>
-            </a>
-          </div>
-        )}
-      </div>
-    </Card>
-  )
-}
 
 interface NostrAccountView {
   name: string
@@ -122,11 +47,7 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
   const seed = useMemo(() => lnpassIdToSeed(lnpassId), [lnpassId])
   const masterKey = useMemo(() => HDKey.fromMasterSeed(seed), [seed])
 
-  const {
-    accounts,
-    addNewAccount,
-    restoreAccount,
-  } = useAccountsContext()
+  const { accounts, addNewAccount, restoreAccount } = useAccountsContext()
 
   const [showLightningLoginModal, setShowLightningLoginModal] = useState(false)
   const [showNostrModal, setShowNostrModal] = useState(false)
@@ -232,6 +153,8 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
     })
   }, [nostrStorageData])
 
+  const restoreAccountsFromNostr = useCallback(() => {}, [])
+
   return (
     <>
       <h2 className="text-3xl font-bold tracking-tighter">Identities</h2>
@@ -240,19 +163,32 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
 
       <div className="mt-2 mb-4">
         {!accounts || accounts.length === 0 ? (
-          <div className="cursor-pointer" onClick={() => addNewAccount()}>
-            <Card>
-              <div className="flex flex-row items-center gap-4">
-                <div className="text-3xl">👋</div>
-                <div className="flex-1">
-                  <span>Hey there!</span>
-                  <p>Go ahead, create your first identity</p>
+          <div className="flex flex-col gap-2 items-center">
+            <div className="cursor-pointer w-full" onClick={() => addNewAccount()}>
+              <Card>
+                <div className="flex flex-row items-center gap-4">
+                  <div className="text-3xl">👋</div>
+                  <div className="flex-1">
+                    <span>Hey there!</span>
+                    <p>Go ahead, create your first identity</p>
+                  </div>
+                  <div>
+                    <ArrowRightIcon className="h-8 w-8 text-purple-500" />
+                  </div>
                 </div>
-                <div>
-                  <ArrowRightIcon className="h-8 w-8 text-purple-500" />
-                </div>
-              </div>
-            </Card>
+              </Card>
+            </div>
+
+            {/*<div className="flex justify-center">
+            <div className="text-sm">... or ...</div>
+          </div>
+          <div className="flex justify-center">
+            <Tooltip content="Restore from nostr">
+              <Button outline={true} gradientDuoTone="purpleToBlue" size="xl" onClick={() => restoreAccountsFromNostr()}>
+                <div className="text-xl">Restore from nostr</div>
+              </Button>
+            </Tooltip>
+        </div>*/}
           </div>
         ) : (
           <>

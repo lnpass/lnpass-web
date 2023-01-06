@@ -35,11 +35,13 @@ function Index({ lnpassId, generateLoginHref }: IndexProps) {
   if (!lnpassId) {
     return <Navigate to={ROUTES.login} replace={true} />
   } else {
-    return <>
-      <AccountsProvider value={{ lnpassId }}>
-        <IdentitiesPage lnpassId={lnpassId} generateLoginHref={generateLoginHref} />
-      </AccountsProvider>
-    </>
+    return (
+      <>
+        <AccountsProvider value={{ lnpassId }}>
+          <IdentitiesPage lnpassId={lnpassId} generateLoginHref={generateLoginHref} />
+        </AccountsProvider>
+      </>
+    )
   }
 }
 
