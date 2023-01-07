@@ -62,3 +62,9 @@ export const deriveNostrPrivateKey = (masterKey: HDKey): NostrPrivateKey => {
   }
   return toNostrPrivateKey(key.privateKey)
 }
+
+export const deriveNostrKeys = (masterKey: HDKey) => {
+  const nostrPublicKey = deriveNostrPublicKey(masterKey)
+  const nostrPrivateKey = deriveNostrPrivateKey(masterKey)
+  return [nostrPublicKey, nostrPrivateKey]
+}

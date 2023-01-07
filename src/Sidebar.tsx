@@ -1,6 +1,11 @@
 import { Link } from 'react-router-dom'
 import { Sidebar as FbSidebar } from 'flowbite-react'
-import { IdentificationIcon, DocumentArrowDownIcon, ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline'
+import {
+  IdentificationIcon,
+  DocumentArrowDownIcon,
+  ArrowLeftOnRectangleIcon,
+  WrenchScrewdriverIcon,
+} from '@heroicons/react/24/outline'
 import ROUTES from './routes'
 
 interface SidebarProps {
@@ -30,6 +35,11 @@ export function Sidebar({ elementId, logout }: SidebarProps) {
             <Link to={ROUTES.backup}>
               <FbSidebar.Item as={'span'} icon={DocumentArrowDownIcon}>
                 Backup
+              </FbSidebar.Item>
+            </Link>
+            <Link to={ROUTES.settings}>
+              <FbSidebar.Item as={'span'} icon={WrenchScrewdriverIcon}>
+                Settings
               </FbSidebar.Item>
             </Link>
             {/*<Link to={ROUTES.export}>

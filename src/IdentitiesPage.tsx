@@ -5,12 +5,12 @@ import { HDKey } from '@scure/bip32'
 import { sha256 } from '@noble/hashes/sha256'
 import { bytesToHex } from '@noble/hashes/utils'
 
-import { LnpassId, lnpassIdToSeed } from './utils/lnpassId'
+import { LnpassId, lnpassIdToHDKey } from './utils/lnpassId'
 import { AccountEditModal } from './AccountEditModal'
 import { LightningLoginModal } from './LightningLoginModal'
 import { NostrKeysModal } from './components/NostrKeysModal'
 import { NostrStorageContextEntry, useNostrStorageContext } from './contexts/NostrStorageContext'
-import { deriveNostrPrivateKey, deriveNostrPublicKey } from './utils/nostr'
+import { deriveNostrKeys } from './utils/nostr'
 import { getEventHash, signEvent, nip04 } from 'nostr-tools'
 import { useAccountsContext } from './contexts/AccountsContext'
 import { AccountCard } from './components/AccountCard'
@@ -20,11 +20,7 @@ const LNPASS_NOSTR_EVENT_KIND = 10_001 // replaceable
 const LNPASS_NOSTR_EVENT_REF = bytesToHex(sha256('lnpass'))
 
 const toNostrKeys = (lnpassId: LnpassId) => {
-  const seed = lnpassIdToSeed(lnpassId)
-  const masterKey = HDKey.fromMasterSeed(seed)
-  const nostrPublicKey = deriveNostrPublicKey(masterKey)
-  const nostrPrivateKey = deriveNostrPrivateKey(masterKey)
-  return [nostrPublicKey, nostrPrivateKey]
+  return deriveNostrKeys(lnpassIdToHDKey(lnpassId))
 }
 
 const pullDataFromNostr = (

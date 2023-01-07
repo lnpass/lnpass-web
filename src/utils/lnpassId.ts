@@ -1,3 +1,4 @@
+import { HDKey } from '@scure/bip32'
 import { bech32m } from 'bech32'
 
 const LNPASS_ID_PREFIX = 'lnpass'
@@ -20,6 +21,10 @@ export const lnpassIdToSeed = (id: LnpassId): Seed => {
     throw new Error('Cannot decode lnpassId: invalid prefix')
   }
   return Uint8Array.from(bech32m.fromWords(decoded.words))
+}
+
+export const lnpassIdToHDKey = (id: LnpassId): HDKey => {
+  return HDKey.fromMasterSeed(lnpassIdToSeed(id))
 }
 
 export const toLnpassIdOrThrow = (idLike: string) => {

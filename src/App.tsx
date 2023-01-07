@@ -20,6 +20,8 @@ import './App.css'
 import { MobileMenuBar } from './MobileMenuBar'
 import { BackupPage } from './BackupPage'
 import { AccountsProvider } from './contexts/AccountsContext'
+import { SettingsPage } from './SettingsPage'
+import { EncryptedSettingsProvider } from './contexts/EncryptedSettingsContext'
 
 /* Using HashRouter for GitHub Pages compatibility */
 const USE_HASH_ROUTER = true
@@ -102,6 +104,16 @@ function App() {
                   <>
                     <BackupPage lnpassId={lnpassId} generateLoginHref={generateLoginHref} />
                   </>
+                }
+              />
+
+              <Route
+                id="settings"
+                path={ROUTES.settings}
+                element={
+                  <EncryptedSettingsProvider value={{ lnpassId }}>
+                    <SettingsPage lnpassId={lnpassId} />
+                  </EncryptedSettingsProvider>
                 }
               />
             </>

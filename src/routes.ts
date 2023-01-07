@@ -3,6 +3,7 @@ const ROUTES = {
   login: '/login',
   //export: '/export',
   backup: '/backup',
+  settings: '/settings',
   import: '/import',
   '*': '/',
 }
