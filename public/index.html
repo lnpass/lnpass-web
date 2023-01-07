@@ -27,7 +27,13 @@
     -->
     
     <script>
-      window.APP = { SETTINGS_STORE_KEY: 'lnpass-app-settings' }
+      window.APP = { 
+        SETTINGS_STORE_KEY: 'lnpass-app-settings',
+        DEFAULT_SECURE_SETTINGS: {
+          nostrBackupsEnabled: true,
+          autoSyncNostrEnabled: false
+        }
+      }
     </script>
     <title>lnpass</title>
   </head>

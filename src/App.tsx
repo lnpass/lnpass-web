@@ -111,8 +111,8 @@ function App() {
                 id="settings"
                 path={ROUTES.settings}
                 element={
-                  <EncryptedSettingsProvider value={{ lnpassId }}>
-                    <SettingsPage lnpassId={lnpassId} />
+                  <EncryptedSettingsProvider value={{ lnpassId, defaultValues: window.APP.DEFAULT_SECURE_SETTINGS }}>
+                    <SettingsPage />
                   </EncryptedSettingsProvider>
                 }
               />

@@ -2,13 +2,10 @@ import { Checkbox, Label } from 'flowbite-react'
 import { useEffect, useState } from 'react'
 import { useFetchSecureSettingsValues, useUpdateSecureSettingsValue } from './contexts/EncryptedSettingsContext'
 import { AppSettings, useSettings, useSettingsDispatch } from './contexts/SettingsContext'
-import { LnpassId } from './utils/lnpassId'
 
-interface SettingsPageProps {
-  lnpassId: LnpassId
-}
+interface SettingsPageProps {}
 
-export function SettingsPage({ lnpassId }: SettingsPageProps) {
+export function SettingsPage({}: SettingsPageProps) {
   const settings = useSettings()
   const settingsDispatch = useSettingsDispatch()
   const fetchSecureSettingsValues = useFetchSecureSettingsValues()
@@ -41,7 +38,7 @@ export function SettingsPage({ lnpassId }: SettingsPageProps) {
               <div className="flex h-5 items-center">
                 <Checkbox
                   id="enable-nostr-backups-checkbox"
-                  checked={secureSettings['nostrBackupsEnabled']}
+                  checked={secureSettings.nostrBackupsEnabled || false}
                   onChange={(event) => updateSecureSettingsValue('nostrBackupsEnabled', event.target.checked)}
                 />
               </div>
@@ -56,7 +53,7 @@ export function SettingsPage({ lnpassId }: SettingsPageProps) {
               <div className="flex h-5 items-center">
                 <Checkbox
                   id="auto-sync-nostr-checkbox"
-                  checked={secureSettings['autoSyncNostrEnabled']}
+                  checked={secureSettings.autoSyncNostrEnabled || false}
                   onChange={(event) => updateSecureSettingsValue('autoSyncNostrEnabled', event.target.checked)}
                 />
               </div>

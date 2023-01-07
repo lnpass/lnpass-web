@@ -10,7 +10,7 @@ const toNostrKeys = (lnpassId: LnpassId) => {
   return deriveNostrKeys(lnpassIdToHDKey(lnpassId))
 }
 
-type SecureValues = { [k: string]: any }
+type SecureValues = { [key: string]: any }
 
 interface EncryptedSettingsEntry {
   fetchValues: () => Promise<SecureValues>
@@ -21,10 +21,11 @@ const EncryptedSettingsContext = createContext<EncryptedSettingsEntry | undefine
 
 interface EncryptedSettingsProviderProps {
   lnpassId: LnpassId
+  defaultValues: SecureValues
 }
 
 const EncryptedSettingsProvider = ({
-  value: { lnpassId },
+  value: { lnpassId, defaultValues },
   children,
 }: ProviderProps<EncryptedSettingsProviderProps>) => {
   const settings = useSettings()
@@ -39,7 +40,7 @@ const EncryptedSettingsProvider = ({
 
   const fetchAndDecryptEncryptedSettings = useCallback(async () => {
     if (!ecryptedSettings) {
-      return {}
+      return defaultValues
     }
 
     return nip04

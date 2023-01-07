@@ -7,6 +7,7 @@ import './index.css'
 declare global {
   interface AppGlobal {
     SETTINGS_STORE_KEY: string
+    DEFAULT_SECURE_SETTINGS: { [key: string]: any }
   }
 
   interface Window {
