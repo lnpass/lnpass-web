@@ -169,6 +169,7 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
         )
         .then((data) => {
           if (signal.aborted) return
+          setIsNostrStoragePulling(false)
           setNostrStorageIncomingError(undefined)
           setNostrStorageIncomingData(data)
         })
@@ -176,11 +177,8 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
           console.warn('Error while fetching event from nostr', err)
 
           if (signal.aborted) return
-          setNostrStorageIncomingError(err)
-        })
-        .finally(() => {
-          if (signal.aborted) return
           setIsNostrStoragePulling(false)
+          setNostrStorageIncomingError(err)
         })
     },
     [lnpassId, nostrStorage]

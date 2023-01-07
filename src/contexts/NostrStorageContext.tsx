@@ -12,7 +12,11 @@ const NostrStorageProvider = ({ children }: ProviderProps<{}>) => {
   const pullSingle = useCallback((host: string, filters: Filter[], signal: AbortSignal) => {
     return new Promise<Event | null>(async (resolve, reject) => {
       const relay = relayInit(host)
-      await relay.connect()
+      try {
+        await relay.connect()
+      } catch (e) {
+        reject(e)
+      }
 
       let sub: Sub | null = null
 
@@ -56,8 +60,11 @@ const NostrStorageProvider = ({ children }: ProviderProps<{}>) => {
   const pushSingle = useCallback((host: string, event: Event, signal: AbortSignal) => {
     return new Promise<Event>(async (resolve, reject) => {
       const relay = relayInit(host)
-      await relay.connect()
-
+      try {
+        await relay.connect()
+      } catch (e) {
+        reject(e)
+      }
       const intervalId = setInterval(() => {
         if (signal.aborted) {
           cleanUp(() => reject())
