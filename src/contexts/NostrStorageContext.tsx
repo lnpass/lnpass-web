@@ -18,7 +18,6 @@ const NostrStorageProvider = ({ children }: ProviderProps<{}>) => {
 
       const intervalId = setInterval(() => {
         if (signal.aborted) {
-          clearInterval(intervalId)
           cleanUp(() => reject())
         }
       }, 100)
@@ -27,6 +26,8 @@ const NostrStorageProvider = ({ children }: ProviderProps<{}>) => {
       const cleanUp = async (cb: () => void) => {
         if (cleanUpCalled) return
         cleanUpCalled = true
+
+        clearInterval(intervalId)
         sub && sub.unsub()
         await relay.close()
         cb()
@@ -59,7 +60,6 @@ const NostrStorageProvider = ({ children }: ProviderProps<{}>) => {
 
       const intervalId = setInterval(() => {
         if (signal.aborted) {
-          clearInterval(intervalId)
           cleanUp(() => reject())
         }
       }, 100)
@@ -68,6 +68,7 @@ const NostrStorageProvider = ({ children }: ProviderProps<{}>) => {
       const cleanUp = async (cb: () => void) => {
         if (cleanUpCalled) return
         cleanUpCalled = true
+        clearInterval(intervalId)
         await relay.close()
         cb()
       }
