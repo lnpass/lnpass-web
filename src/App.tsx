@@ -40,7 +40,9 @@ function Index({ lnpassId, generateLoginHref }: IndexProps) {
     return (
       <>
         <AccountsProvider value={{ lnpassId }}>
-          <IdentitiesPage lnpassId={lnpassId} generateLoginHref={generateLoginHref} />
+          <EncryptedSettingsProvider value={{ lnpassId, defaultValues: window.APP.DEFAULT_SECURE_SETTINGS }}>
+            <IdentitiesPage lnpassId={lnpassId} generateLoginHref={generateLoginHref} />
+          </EncryptedSettingsProvider>
         </AccountsProvider>
       </>
     )

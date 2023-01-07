@@ -28,7 +28,7 @@ const NostrStorageProvider = ({ children }: ProviderProps<{}>) => {
         cleanUpCalled = true
 
         clearInterval(intervalId)
-        sub && sub.unsub()
+        // sub && sub.unsub() <- unsub is not async, we close socket anyway
         await relay.close()
         cb()
       }

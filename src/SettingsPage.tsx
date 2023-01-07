@@ -11,7 +11,7 @@ export function SettingsPage({}: SettingsPageProps) {
   const fetchSecureSettingsValues = useFetchSecureSettingsValues()
   const updateSecureSettingsValue = useUpdateSecureSettingsValue()
 
-  const [secureSettings, setSecureSettings] = useState<{ [k: string]: any } | undefined>(undefined)
+  const [secureSettings, setSecureSettings] = useState<{ [key: string]: any } | undefined>(undefined)
 
   useEffect(() => {
     const abortCtrl = new AbortController()
@@ -43,7 +43,7 @@ export function SettingsPage({}: SettingsPageProps) {
                 />
               </div>
               <div className="flex flex-col">
-                <Label htmlFor="auto-sync-nostr-checkbox">Enable backups</Label>
+                <Label htmlFor="enable-nostr-backups-checkbox">Enable backups</Label>
                 <div className="text-gray-500 dark:text-gray-300">
                   <span className="text-xs font-normal">Displays an option to push encrypted backups to Nostr</span>
                 </div>

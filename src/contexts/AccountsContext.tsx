@@ -20,12 +20,20 @@ const createNewAccount = (parentKey: HDKey, path: string): Account => {
   }
 }
 
+const sortByPath = (arr: Account[]) => {
+  return arr.sort((a, b) => {
+    if (a.hdKey.index > b.hdKey.index) return 1
+    if (a.hdKey.index < b.hdKey.index) return -1
+    return 0
+  })
+}
+
 const createNextAccount = (masterKey: HDKey, current?: Account[]) => {
   if (!current || current.length === 0) {
     return createAccountWith(masterKey, lnpassAccountDerivationPath(0))
   } else {
-    const lastAccount = current[current.length - 1]
-    return createAccountWith(masterKey, lnpassAccountDerivationPath(lastAccount.hdKey.index + 1))
+    const nextIndex = 1 + current.map((it) => it.hdKey.index).reduce((acc, curr) => Math.max(acc, curr), -1)
+    return createAccountWith(masterKey, lnpassAccountDerivationPath(nextIndex))
   }
 }
 
@@ -57,7 +65,7 @@ const AccountsProvider = ({ value: { lnpassId }, children }: ProviderProps<Accou
     }
 
     setAccounts((current) => {
-      return [...(current || []), createNextAccount(masterKey, current)]
+      return sortByPath([...(current || []), createNextAccount(masterKey, current)])
     })
   }, [masterKey])
 
@@ -68,7 +76,7 @@ const AccountsProvider = ({ value: { lnpassId }, children }: ProviderProps<Accou
       }
 
       setAccounts((current) => {
-        return [...(current || []), createAccountWith(masterKey, path, partial)]
+        return sortByPath([...(current || []), createAccountWith(masterKey, path, partial)])
       })
     },
     [masterKey]
@@ -83,7 +91,7 @@ const AccountsProvider = ({ value: { lnpassId }, children }: ProviderProps<Accou
       setAccounts((current) => {
         if (current === undefined) return undefined
         const other = current.filter((it) => it.path !== account.path)
-        return [...other, account]
+        return sortByPath([...other, account])
       })
     },
     [masterKey]
