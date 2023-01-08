@@ -117,6 +117,7 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
     if (nostrStorageIncomingData === undefined) return true
     return nostrStorageIncomingError !== undefined
   }, [nostrStorageIncomingData, nostrStorageIncomingError])
+
   // sync `accounts => nostr (outgoing)`
   const nostrStorageOutgoingData = useMemo(() => {
     if (!accounts) return
@@ -361,26 +362,36 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
                 />
               </>
             )}
-            {accounts.map((it) => (
-              <div key={it.hdKey.index} className="mb-2">
-                <AccountCard
-                  account={it}
-                  edit={(account) => {
-                    setSelectedAccount(account)
-                    setShowEditModal(true)
-                  }}
-                  generateLoginHref={generateLoginHref}
-                  onClickLightning={(account) => {
-                    setSelectedAccount(account)
-                    setShowLightningLoginModal(true)
-                  }}
-                  onClickNostr={(account) => {
-                    setSelectedAccount(account)
-                    setShowNostrModal(true)
-                  }}
-                />
-              </div>
-            ))}
+            <div className="mb-8">
+              {accounts.map((it) => (
+                <div key={it.hdKey.index} className="mb-2">
+                  <AccountCard
+                    account={it}
+                    edit={(account) => {
+                      setSelectedAccount(account)
+                      setShowEditModal(true)
+                    }}
+                    generateLoginHref={generateLoginHref}
+                    onClickLightning={(account) => {
+                      setSelectedAccount(account)
+                      setShowLightningLoginModal(true)
+                    }}
+                    onClickNostr={(account) => {
+                      setSelectedAccount(account)
+                      setShowNostrModal(true)
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+            {isNostrStoragePulling && (
+              <>
+                <div className="flex flex-col gap-2 justify-center items-center">
+                  <Spinner className="mr-2" color="purple" aria-label="Syncing from nostr" size="xl" />
+                  Syncing from nostr...
+                </div>
+              </>
+            )}
           </>
         )}
       </div>

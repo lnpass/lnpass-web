@@ -1,5 +1,5 @@
 import { ProviderProps, createContext, useContext, useCallback } from 'react'
-import { relayInit, generatePrivateKey, getPublicKey, getEventHash, signEvent, Event, Sub, Filter } from 'nostr-tools'
+import { relayInit, Event, Sub, Filter } from 'nostr-tools'
 
 export interface NostrStorageContextEntry {
   pullSingle: (host: string, filters: Filter[], signal: AbortSignal) => Promise<Event | null>

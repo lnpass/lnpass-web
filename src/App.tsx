@@ -92,11 +92,9 @@ function Index({ lnpassId, generateLoginHref }: IndexProps) {
   } else {
     return (
       <>
-        <AccountsProvider value={{ lnpassId }}>
-          <EncryptedSettingsProvider value={{ lnpassId, defaultValues: DEFAULT_SECURE_SETTINGS }}>
-            <IdentitiesPage lnpassId={lnpassId} generateLoginHref={generateLoginHref} />
-          </EncryptedSettingsProvider>
-        </AccountsProvider>
+        <EncryptedSettingsProvider value={{ lnpassId, defaultValues: DEFAULT_SECURE_SETTINGS }}>
+          <IdentitiesPage lnpassId={lnpassId} generateLoginHref={generateLoginHref} />
+        </EncryptedSettingsProvider>
       </>
     )
   }
@@ -208,7 +206,9 @@ function App() {
         usePreferences: false,
       }}
     >
-      <RouterProvider router={router} />
+      <AccountsProvider value={{ lnpassId }}>
+        <RouterProvider router={router} />
+      </AccountsProvider>
     </Flowbite>
   )
 }

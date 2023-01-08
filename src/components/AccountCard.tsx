@@ -1,10 +1,8 @@
 import { useMemo } from 'react'
 import { Button, Card } from 'flowbite-react'
 import { PencilSquareIcon, BoltIcon, KeyIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid'
-import { sha256 } from '@noble/hashes/sha256'
-import { bytesToHex } from '@noble/hashes/utils'
 
-import { LnpassId, lnpassIdToSeed, seedToLnpassId } from '../utils/lnpassId'
+import { LnpassId, seedToLnpassId } from '../utils/lnpassId'
 import { lnpassAccountDerivationPath } from '../utils/lnpass'
 import { deriveEntropy } from '../utils/bip85'
 
