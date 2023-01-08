@@ -44,7 +44,7 @@ export function LoginPage({ onSubmit }: LoginPageProps) {
 
   return (
     <div className="flex h-screen justify-center items-center text-3xl">
-      <div className="w-full max-w-7xl">
+      <div className="flex-1 max-w-7xl m-2">
         <Card>
           <div className="flex justify-center">Welcome</div>
           <div>

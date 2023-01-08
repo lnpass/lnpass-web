@@ -23,6 +23,59 @@ import { SettingsPage } from './SettingsPage'
 
 import './App.css'
 
+const devMode = process.env.NODE_ENV === 'development' && process.env.REACT_APP_DEV_MODE === 'true'
+
+const DEFAULT_SECURE_SETTINGS = {
+  autoSyncNostrEnabled: false,
+  relays: (() => {
+    const developmentRelays = devMode
+      ? [
+          {
+            url: 'ws://localhost:7000',
+            read: true,
+            write: true,
+          },
+          {
+            url: 'wss://non-existing-nostr-relay.example.com:7000',
+            read: false,
+            write: true,
+          },
+        ]
+      : []
+
+    const enableProdRelays = !devMode
+    const prodRelays = [
+      {
+        url: 'wss://nostr-pub.wellorder.net',
+        read: enableProdRelays,
+        write: enableProdRelays,
+      },
+      {
+        url: 'wss://relay.nostr.info',
+        read: false,
+        write: enableProdRelays,
+      },
+      {
+        url: 'wss://nostr.rocks',
+        read: false,
+        write: enableProdRelays,
+      },
+      {
+        url: 'wss://nostr-relay.wlvs.space',
+        read: false,
+        write: enableProdRelays,
+      },
+      {
+        url: 'wss://nostr-relay.untethr.me',
+        read: false,
+        write: enableProdRelays,
+      },
+    ]
+
+    return [...developmentRelays, ...prodRelays]
+  })(),
+}
+
 /* Using HashRouter for GitHub Pages compatibility */
 const USE_HASH_ROUTER = true
 
@@ -40,7 +93,7 @@ function Index({ lnpassId, generateLoginHref }: IndexProps) {
     return (
       <>
         <AccountsProvider value={{ lnpassId }}>
-          <EncryptedSettingsProvider value={{ lnpassId, defaultValues: window.APP.DEFAULT_SECURE_SETTINGS }}>
+          <EncryptedSettingsProvider value={{ lnpassId, defaultValues: DEFAULT_SECURE_SETTINGS }}>
             <IdentitiesPage lnpassId={lnpassId} generateLoginHref={generateLoginHref} />
           </EncryptedSettingsProvider>
         </AccountsProvider>
@@ -113,7 +166,7 @@ function App() {
                 id="settings"
                 path={ROUTES.settings}
                 element={
-                  <EncryptedSettingsProvider value={{ lnpassId, defaultValues: window.APP.DEFAULT_SECURE_SETTINGS }}>
+                  <EncryptedSettingsProvider value={{ lnpassId, defaultValues: DEFAULT_SECURE_SETTINGS }}>
                     <SettingsPage />
                   </EncryptedSettingsProvider>
                 }

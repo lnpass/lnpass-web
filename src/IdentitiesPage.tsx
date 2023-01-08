@@ -238,23 +238,25 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
             )}{' '}
             Sync from nostr
           </Button>
-          {accounts && accounts.length > 0 && (<div>
-            <Button
-              outline={!needsNostrPush}
-              gradientDuoTone="purpleToBlue"
-              size="xs"
-              disabled={isNostrStoragePushing}
-              onClick={() => {
-                const abortCtrl = new AbortController()
-                syncAccountsToNostr({ signal: abortCtrl.signal })
-              }}
-            >
-              {isNostrStoragePushing && (
-                <Spinner className="mr-2" color="purple" aria-label="Pushing to nostr" size="xs" />
-              )}
-              Sync to nostr
-            </Button>
-          </div>)}
+          {accounts && accounts.length > 0 && (
+            <div>
+              <Button
+                outline={!needsNostrPush}
+                gradientDuoTone="purpleToBlue"
+                size="xs"
+                disabled={isNostrStoragePushing}
+                onClick={() => {
+                  const abortCtrl = new AbortController()
+                  syncAccountsToNostr({ signal: abortCtrl.signal })
+                }}
+              >
+                {isNostrStoragePushing && (
+                  <Spinner className="mr-2" color="purple" aria-label="Pushing to nostr" size="xs" />
+                )}
+                Sync to nostr
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

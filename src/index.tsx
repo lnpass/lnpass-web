@@ -7,7 +7,6 @@ import './index.css'
 declare global {
   interface AppGlobal {
     SETTINGS_STORE_KEY: string
-    DEFAULT_SECURE_SETTINGS: { [key: string]: any }
   }
 
   interface Window {
@@ -16,7 +15,7 @@ declare global {
 }
 
 const defaultAppSettings = {
-  dev: process.env.NODE_ENV === 'development'
+  dev: process.env.NODE_ENV === 'development',
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
