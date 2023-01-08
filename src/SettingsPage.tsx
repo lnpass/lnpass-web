@@ -123,36 +123,36 @@ export function SettingsPage() {
                 {secureSettings.relays &&
                   secureSettings.relays.map((it: any, index: number) => {
                     return (
-                        <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={index}>
-                          <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                            {it.url}
-                          </Table.Cell>
-                          <Table.Cell>
-                            <ToggleSwitch
-                              label="read"
-                              checked={it.read || false}
-                              onChange={() => toggleReadForRelay(secureSettings.relays, it)}
-                            />
-                          </Table.Cell>
-                          <Table.Cell>
-                            <ToggleSwitch
-                              label="write"
-                              checked={it.write || false}
-                              onChange={() => toggleWriteForRelay(secureSettings.relays, it)}
-                            />
-                          </Table.Cell>
-                          <Table.Cell>
-                            <Button
-                              className="border-1"
-                              onClick={() => removeRelay(secureSettings.relays, it)}
-                              pill={true}
-                              outline={true}
-                              size="xs"
-                            >
-                              <XMarkIcon className="h-4 w-4" />
-                            </Button>
-                          </Table.Cell>
-                        </Table.Row>
+                      <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={index}>
+                        <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                          {it.url}
+                        </Table.Cell>
+                        <Table.Cell>
+                          <ToggleSwitch
+                            label="read"
+                            checked={it.read || false}
+                            onChange={() => toggleReadForRelay(secureSettings.relays, it)}
+                          />
+                        </Table.Cell>
+                        <Table.Cell>
+                          <ToggleSwitch
+                            label="write"
+                            checked={it.write || false}
+                            onChange={() => toggleWriteForRelay(secureSettings.relays, it)}
+                          />
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Button
+                            className="border-1"
+                            onClick={() => removeRelay(secureSettings.relays, it)}
+                            pill={true}
+                            outline={true}
+                            size="xs"
+                          >
+                            <XMarkIcon className="h-4 w-4" />
+                          </Button>
+                        </Table.Cell>
+                      </Table.Row>
                     )
                   })}
               </Table.Body>

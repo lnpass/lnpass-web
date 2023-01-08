@@ -13,6 +13,7 @@ import { AccountEditModal } from './components/AccountEditModal'
 import { LightningLoginModal } from './components/LightningLoginModal'
 import { NostrKeysModal } from './components/NostrKeysModal'
 import { AccountCard } from './components/AccountCard'
+import { useFetchSecureSettingsValues } from './contexts/EncryptedSettingsContext'
 
 const LNPASS_NOSTR_EVENT_KIND = 10_001 // replaceable
 const LNPASS_NOSTR_EVENT_REF = bytesToHex(sha256('lnpass'))
@@ -139,6 +140,23 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
     return JSON.stringify(nostrStorageIncomingData) !== JSON.stringify(nostrStorageOutgoingData)
   }, [nostrStorageIncomingData, nostrStorageOutgoingData])
 
+  const fetchSecureSettingsValues = useFetchSecureSettingsValues()
+  const [nostrRelays, setNostrRelays] = useState<any[]>([])
+  const readRelays = useMemo(() => nostrRelays.filter((it: any) => !!it.read), [nostrRelays])
+  const writeRelays = useMemo(() => nostrRelays.filter((it: any) => !!it.write), [nostrRelays])
+
+  useEffect(() => {
+    const abortCtrl = new AbortController()
+    fetchSecureSettingsValues().then((val) => {
+      if (abortCtrl.signal.aborted) return
+      setNostrRelays(val.relays || [])
+    })
+
+    return () => {
+      abortCtrl.abort()
+    }
+  }, [fetchSecureSettingsValues])
+
   const [showLightningLoginModal, setShowLightningLoginModal] = useState(false)
   const [showNostrModal, setShowNostrModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -156,8 +174,12 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
 
   const syncAccountsFromNostr = useCallback(
     ({ signal }: { signal: AbortSignal }) => {
+      if (readRelays.length === 0) return
+
+      const primaryReadRelay = readRelays[0].url
+
       setIsNostrStoragePulling(true)
-      return pullDataFromNostr(lnpassId, 'ws://localhost:7000', nostrStorage, signal)
+      return pullDataFromNostr(lnpassId, primaryReadRelay, nostrStorage, signal)
         .then(
           (data) =>
             data || {
@@ -179,31 +201,43 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
           setNostrStorageIncomingError(err)
         })
     },
-    [lnpassId, nostrStorage]
+    [lnpassId, readRelays, nostrStorage]
   )
 
   const syncAccountsToNostr = useCallback(
     ({ signal }: { signal: AbortSignal }) => {
+      if (writeRelays.length === 0) {
+        throw new Error('Illegal state: No relays configured')
+      }
+
       if (!nostrStorageOutgoingData) return
 
       setIsNostrStoragePushing(true)
 
-      pushDataFromNostr(lnpassId, 'ws://localhost:7000', nostrStorage, signal, nostrStorageOutgoingData)
-        .then((event) => {
-          console.debug('Nostr outgoing event', event)
+      const writes = writeRelays.map((it: any) => {
+        return pushDataFromNostr(lnpassId, it.url, nostrStorage, signal, nostrStorageOutgoingData)
+      })
+
+      Promise.allSettled(writes)
+        .then((events) => {
+          console.debug('Nostr outgoing events', events)
 
           if (signal.aborted) return
           setIsNostrStoragePushing(false)
           return syncAccountsFromNostr({ signal })
         })
         .catch((err) => {
-          console.warn('Error while pushing event to nostr', err)
+          console.warn('Error while pushing events to nostr', err)
 
           if (signal.aborted) return
           setIsNostrStoragePushing(false)
         })
+        .then(() => {
+          if (signal.aborted) return
+          return syncAccountsFromNostr({ signal })
+        })
     },
-    [lnpassId, nostrStorage, nostrStorageOutgoingData, syncAccountsFromNostr]
+    [lnpassId, writeRelays, nostrStorage, nostrStorageOutgoingData, syncAccountsFromNostr]
   )
 
   // initialize by pulling data from nostr
