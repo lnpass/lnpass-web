@@ -12,16 +12,16 @@ import {
 } from 'react-router-dom'
 import ROUTES from './routes'
 import { LnpassId } from './utils/lnpassId'
+import { Sidebar } from './components/Sidebar'
+import { MobileMenuBar } from './components/MobileMenuBar'
+import { AccountsProvider } from './contexts/AccountsContext'
+import { EncryptedSettingsProvider } from './contexts/EncryptedSettingsContext'
 import { LoginPage } from './LoginPage'
 import { IdentitiesPage } from './IdentitiesPage'
-import { Sidebar } from './Sidebar'
+import { BackupPage } from './BackupPage'
+import { SettingsPage } from './SettingsPage'
 
 import './App.css'
-import { MobileMenuBar } from './MobileMenuBar'
-import { BackupPage } from './BackupPage'
-import { AccountsProvider } from './contexts/AccountsContext'
-import { SettingsPage } from './SettingsPage'
-import { EncryptedSettingsProvider } from './contexts/EncryptedSettingsContext'
 
 /* Using HashRouter for GitHub Pages compatibility */
 const USE_HASH_ROUTER = true

@@ -3,9 +3,7 @@ import { useEffect, useState } from 'react'
 import { useFetchSecureSettingsValues, useUpdateSecureSettingsValue } from './contexts/EncryptedSettingsContext'
 import { AppSettings, useSettings, useSettingsDispatch } from './contexts/SettingsContext'
 
-interface SettingsPageProps {}
-
-export function SettingsPage({}: SettingsPageProps) {
+export function SettingsPage() {
   const settings = useSettings()
   const settingsDispatch = useSettingsDispatch()
   const fetchSecureSettingsValues = useFetchSecureSettingsValues()

@@ -46,7 +46,7 @@ const EncryptedSettingsProvider = ({
     return nip04
       .decrypt(nostrPrivateKey.hex, nostrPublicKey.hex, ecryptedSettings)
       .then((decrypted) => JSON.parse(decrypted) as SecureValues)
-  }, [ecryptedSettings, nostrPrivateKey, nostrPublicKey])
+  }, [defaultValues, ecryptedSettings, nostrPrivateKey, nostrPublicKey])
 
   useEffect(() => {
     const abortCtrl = new AbortController()
@@ -73,7 +73,7 @@ const EncryptedSettingsProvider = ({
         } as AppSettings)
       )
     },
-    [decryptedSettings, settingsPropName, nostrPrivateKey, nostrPublicKey]
+    [decryptedSettings, settingsDispatch, settingsPropName, nostrPrivateKey, nostrPublicKey]
   )
 
   return (

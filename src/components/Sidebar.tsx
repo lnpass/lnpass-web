@@ -6,7 +6,7 @@ import {
   ArrowLeftOnRectangleIcon,
   WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline'
-import ROUTES from './routes'
+import ROUTES from '../routes'
 
 interface SidebarProps {
   elementId: string

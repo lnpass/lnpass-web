@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Badge, Button, Label, Modal, ModalProps, Textarea } from 'flowbite-react'
 import { CheckCircleIcon, XCircleIcon, QrCodeIcon, PencilIcon, ArrowPathIcon } from '@heroicons/react/24/solid'
-import { buildLnurlAuthUrl, decodeLnurlAuthRequest } from './utils/lnurlAuth'
+import { buildLnurlAuthUrl, decodeLnurlAuthRequest } from '../utils/lnurlAuth'
 import { Html5QrcodeScanner, Html5QrcodeSupportedFormats, Html5QrcodeScanType } from 'html5-qrcode'
 
 type ActionEnum = 'register' | 'login' | 'link' | 'auth' | null

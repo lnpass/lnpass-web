@@ -1,20 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Card, Spinner, Tooltip } from 'flowbite-react'
 import { ArrowRightIcon, UserPlusIcon } from '@heroicons/react/24/solid'
-import { HDKey } from '@scure/bip32'
 import { sha256 } from '@noble/hashes/sha256'
 import { bytesToHex } from '@noble/hashes/utils'
+import { Event, getEventHash, signEvent, nip04 } from 'nostr-tools'
 
-import { LnpassId, lnpassIdToHDKey } from './utils/lnpassId'
-import { AccountEditModal } from './AccountEditModal'
-import { LightningLoginModal } from './LightningLoginModal'
-import { NostrKeysModal } from './components/NostrKeysModal'
-import { NostrStorageContextEntry, useNostrStorageContext } from './contexts/NostrStorageContext'
 import { deriveNostrKeys } from './utils/nostr'
-import { getEventHash, signEvent, nip04 } from 'nostr-tools'
+import { LnpassId, lnpassIdToHDKey } from './utils/lnpassId'
+import { NostrStorageContextEntry, useNostrStorageContext } from './contexts/NostrStorageContext'
 import { useAccountsContext } from './contexts/AccountsContext'
+import { AccountEditModal } from './components/AccountEditModal'
+import { LightningLoginModal } from './components/LightningLoginModal'
+import { NostrKeysModal } from './components/NostrKeysModal'
 import { AccountCard } from './components/AccountCard'
-import { Event } from 'nostr-tools'
 
 const LNPASS_NOSTR_EVENT_KIND = 10_001 // replaceable
 const LNPASS_NOSTR_EVENT_REF = bytesToHex(sha256('lnpass'))
@@ -235,7 +233,7 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
               syncAccountsFromNostr({ signal: abortCtrl.signal })
             }}
           >
-            {isNostrStoragePulling && (
+            {isNostrStorageLoading && (
               <Spinner className="mr-2" color="purple" aria-label="Pulling from nostr" size="xs" />
             )}{' '}
             Sync from nostr

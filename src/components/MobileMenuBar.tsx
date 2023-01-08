@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import ROUTES from './routes'
+import ROUTES from '../routes'
 
 interface MobileMenuBarProps {
   sidebarId: string
