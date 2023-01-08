@@ -13,10 +13,10 @@ import { AccountEditModal } from './components/AccountEditModal'
 import { LightningLoginModal } from './components/LightningLoginModal'
 import { NostrKeysModal } from './components/NostrKeysModal'
 import { AccountCard } from './components/AccountCard'
-import { useFetchSecureSettingsValues } from './contexts/EncryptedSettingsContext'
+import { useFetchSecureSettingsValues } from './contexts/SecureSettingsContext'
 
 const LNPASS_NOSTR_EVENT_KIND = 10_001 // replaceable
-const LNPASS_NOSTR_EVENT_REF = bytesToHex(sha256('lnpass'))
+const LNPASS_NOSTR_EVENT_REF_FUNC = () => bytesToHex(sha256('lnpass'))
 
 const toNostrKeys = (lnpassId: LnpassId) => {
   return deriveNostrKeys(lnpassIdToHDKey(lnpassId))
@@ -37,7 +37,7 @@ const pullDataFromNostr = (
         {
           kinds: [LNPASS_NOSTR_EVENT_KIND],
           authors: [nostrPublicKey.hex],
-          '#e': [LNPASS_NOSTR_EVENT_REF],
+          '#e': [LNPASS_NOSTR_EVENT_REF_FUNC()],
         },
       ],
       signal
@@ -72,7 +72,7 @@ const pushDataFromNostr = (
       kind: LNPASS_NOSTR_EVENT_KIND,
       pubkey: nostrPublicKey.hex,
       created_at: Math.floor(Date.now() / 1000),
-      tags: [['e', LNPASS_NOSTR_EVENT_REF]],
+      tags: [['e', LNPASS_NOSTR_EVENT_REF_FUNC()]],
       content: ciphertext,
     }
     event.id = getEventHash(event)

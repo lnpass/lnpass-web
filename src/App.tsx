@@ -15,7 +15,7 @@ import { LnpassId } from './utils/lnpassId'
 import { Sidebar } from './components/Sidebar'
 import { MobileMenuBar } from './components/MobileMenuBar'
 import { AccountsProvider } from './contexts/AccountsContext'
-import { EncryptedSettingsProvider } from './contexts/EncryptedSettingsContext'
+import { SecureSettingsProvider } from './contexts/SecureSettingsContext'
 import { LoginPage } from './LoginPage'
 import { IdentitiesPage } from './IdentitiesPage'
 import { BackupPage } from './BackupPage'
@@ -92,9 +92,9 @@ function Index({ lnpassId, generateLoginHref }: IndexProps) {
   } else {
     return (
       <>
-        <EncryptedSettingsProvider value={{ lnpassId, defaultValues: DEFAULT_SECURE_SETTINGS }}>
+        <SecureSettingsProvider value={{ lnpassId, defaultValues: DEFAULT_SECURE_SETTINGS }}>
           <IdentitiesPage lnpassId={lnpassId} generateLoginHref={generateLoginHref} />
-        </EncryptedSettingsProvider>
+        </SecureSettingsProvider>
       </>
     )
   }
@@ -164,9 +164,9 @@ function App() {
                 id="settings"
                 path={ROUTES.settings}
                 element={
-                  <EncryptedSettingsProvider value={{ lnpassId, defaultValues: DEFAULT_SECURE_SETTINGS }}>
+                  <SecureSettingsProvider value={{ lnpassId, defaultValues: DEFAULT_SECURE_SETTINGS }}>
                     <SettingsPage />
-                  </EncryptedSettingsProvider>
+                  </SecureSettingsProvider>
                 }
               />
             </>

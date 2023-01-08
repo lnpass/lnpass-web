@@ -1,6 +1,6 @@
 import { Alert, Button, Checkbox, Label, Table, TextInput, ToggleSwitch } from 'flowbite-react'
 import { useCallback, useEffect, useState } from 'react'
-import { useFetchSecureSettingsValues, useUpdateSecureSettingsValue } from './contexts/EncryptedSettingsContext'
+import { useFetchSecureSettingsValues, useUpdateSecureSettingsValue } from './contexts/SecureSettingsContext'
 import { AppSettings, useSettings, useSettingsDispatch } from './contexts/SettingsContext'
 import { InformationCircleIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline'
 

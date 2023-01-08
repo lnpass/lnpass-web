@@ -12,22 +12,22 @@ const toNostrKeys = (lnpassId: LnpassId) => {
 
 type SecureValues = { [key: string]: any }
 
-interface EncryptedSettingsEntry {
+interface SecureSettingsEntry {
   fetchValues: () => Promise<SecureValues>
   updateValue: (key: string, value: any) => Promise<void>
 }
 
-const EncryptedSettingsContext = createContext<EncryptedSettingsEntry | undefined>(undefined)
+const SecureSettingsContext = createContext<SecureSettingsEntry | undefined>(undefined)
 
-interface EncryptedSettingsProviderProps {
+interface SecureSettingsProviderProps {
   lnpassId: LnpassId
   defaultValues: SecureValues
 }
 
-const EncryptedSettingsProvider = ({
+const SecureSettingsProvider = ({
   value: { lnpassId, defaultValues },
   children,
-}: ProviderProps<EncryptedSettingsProviderProps>) => {
+}: ProviderProps<SecureSettingsProviderProps>) => {
   const settings = useSettings()
   const settingsDispatch = useSettingsDispatch()
 
@@ -38,7 +38,7 @@ const EncryptedSettingsProvider = ({
 
   const [decryptedSettings, setDecryptedSettings] = useState<SecureValues | undefined>(undefined)
 
-  const fetchAndDecryptEncryptedSettings = useCallback(async () => {
+  const fetchAndDecryptSecureSettings = useCallback(async () => {
     if (!ecryptedSettings) {
       return defaultValues
     }
@@ -50,7 +50,7 @@ const EncryptedSettingsProvider = ({
 
   useEffect(() => {
     const abortCtrl = new AbortController()
-    fetchAndDecryptEncryptedSettings().then((decrypted) => {
+    fetchAndDecryptSecureSettings().then((decrypted) => {
       if (abortCtrl.signal.aborted) return
       setDecryptedSettings(decrypted)
     })
@@ -58,7 +58,7 @@ const EncryptedSettingsProvider = ({
     return () => {
       abortCtrl.abort()
     }
-  }, [fetchAndDecryptEncryptedSettings])
+  }, [fetchAndDecryptSecureSettings])
 
   const updateValue = useCallback(
     async (key: string, value: any) => {
@@ -77,26 +77,26 @@ const EncryptedSettingsProvider = ({
   )
 
   return (
-    <EncryptedSettingsContext.Provider value={{ fetchValues: fetchAndDecryptEncryptedSettings, updateValue }}>
+    <SecureSettingsContext.Provider value={{ fetchValues: fetchAndDecryptSecureSettings, updateValue }}>
       {children}
-    </EncryptedSettingsContext.Provider>
+    </SecureSettingsContext.Provider>
   )
 }
 
 const useFetchSecureSettingsValues = () => {
-  const context = useContext(EncryptedSettingsContext)
+  const context = useContext(SecureSettingsContext)
   if (context === undefined) {
-    throw new Error('useEncryptedSettings must be used within a EncryptedSettingsProvider')
+    throw new Error('useSecureSettings must be used within a SecureSettingsProvider')
   }
   return context.fetchValues
 }
 
 const useUpdateSecureSettingsValue = () => {
-  const context = useContext(EncryptedSettingsContext)
+  const context = useContext(SecureSettingsContext)
   if (context === undefined) {
-    throw new Error('useEncryptedSettingsDispatch must be used within a EncryptedSettingsProvider')
+    throw new Error('useSecureSettingsDispatch must be used within a SecureSettingsProvider')
   }
   return context.updateValue
 }
 
-export { EncryptedSettingsProvider, useFetchSecureSettingsValues, useUpdateSecureSettingsValue }
+export { SecureSettingsProvider, useFetchSecureSettingsValues, useUpdateSecureSettingsValue }
