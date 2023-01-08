@@ -15,12 +15,16 @@ declare global {
   }
 }
 
+const defaultAppSettings = {
+  dev: process.env.NODE_ENV === 'development'
+}
+
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
 root.render(
   <>
     <NostrStorageProvider value={{}}>
-      <SettingsProvider value={{}}>
+      <SettingsProvider value={{ defaultValues: defaultAppSettings }}>
         <App />
       </SettingsProvider>
     </NostrStorageProvider>

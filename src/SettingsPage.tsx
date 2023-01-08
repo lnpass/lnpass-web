@@ -35,21 +35,6 @@ export function SettingsPage() {
             <div className="flex gap-2">
               <div className="flex h-5 items-center">
                 <Checkbox
-                  id="enable-nostr-backups-checkbox"
-                  checked={secureSettings.nostrBackupsEnabled || false}
-                  onChange={(event) => updateSecureSettingsValue('nostrBackupsEnabled', event.target.checked)}
-                />
-              </div>
-              <div className="flex flex-col">
-                <Label htmlFor="enable-nostr-backups-checkbox">Enable backups</Label>
-                <div className="text-gray-500 dark:text-gray-300">
-                  <span className="text-xs font-normal">Displays an option to push encrypted backups to Nostr</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <div className="flex h-5 items-center">
-                <Checkbox
                   id="auto-sync-nostr-checkbox"
                   checked={secureSettings.autoSyncNostrEnabled || false}
                   onChange={(event) => updateSecureSettingsValue('autoSyncNostrEnabled', event.target.checked)}
@@ -79,7 +64,7 @@ export function SettingsPage() {
           <div className="flex flex-col">
             <Label htmlFor="developer-mode-checkbox">Enable Developer Mode</Label>
             <div className="text-gray-500 dark:text-gray-300">
-              <span className="text-xs font-normal">Append helpful debug information to pages</span>
+              <span className="text-xs font-normal">Append debug information to pages or console</span>
             </div>
           </div>
         </div>

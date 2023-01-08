@@ -238,7 +238,7 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
             )}{' '}
             Sync from nostr
           </Button>
-          <div>
+          {accounts && accounts.length > 0 && (<div>
             <Button
               outline={!needsNostrPush}
               gradientDuoTone="purpleToBlue"
@@ -254,7 +254,7 @@ export function IdentitiesPage({ lnpassId, generateLoginHref }: IdentitiesPagePr
               )}
               Sync to nostr
             </Button>
-          </div>
+          </div>)}
         </div>
       )}
 

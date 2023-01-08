@@ -2,17 +2,9 @@ import { ProviderProps, createContext, useReducer, useEffect, useContext } from 
 
 const localStorageKey = () => window.APP.SETTINGS_STORE_KEY
 
-// TODO: add {read: true, write: true} to relay
-type Relay = string
 export interface AppSettings {
   dev: boolean
-  relays: Relay[]
   [key: string]: any
-}
-
-const initialSettings: AppSettings = {
-  dev: process.env.NODE_ENV === 'development',
-  relays: [],
 }
 
 interface AppSettingsEntry {
@@ -31,10 +23,14 @@ const settingsReducer = (oldSettings: AppSettings, action: AppSettings) => {
   }
 }
 
-const SettingsProvider = ({ children }: ProviderProps<{}>) => {
+interface SettingsProviderProps {
+  defaultValues: AppSettings
+}
+
+const SettingsProvider = ({ value: { defaultValues }, children }: ProviderProps<SettingsProviderProps>) => {
   const [settings, dispatch] = useReducer(
     settingsReducer,
-    Object.assign({}, initialSettings, JSON.parse(window.localStorage.getItem(localStorageKey()) || '{}'))
+    Object.assign({}, defaultValues, JSON.parse(window.localStorage.getItem(localStorageKey()) || '{}'))
   )
 
   useEffect(() => {
