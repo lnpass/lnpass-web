@@ -78,8 +78,8 @@ export function SettingsPage() {
 
       const newRelay = {
         url,
-        read: true,
-        write: relays.length === 0,
+        read: relays.length === 0,
+        write: true,
       }
       updateSecureSettingsValue('relays', [...relays.filter((it: any) => it.url !== url), newRelay])
     },
