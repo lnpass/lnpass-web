@@ -5,6 +5,7 @@ import {
   DocumentArrowDownIcon,
   ArrowLeftOnRectangleIcon,
   WrenchScrewdriverIcon,
+  InformationCircleIcon,
 } from '@heroicons/react/24/outline'
 import ROUTES from '../routes'
 
@@ -40,6 +41,11 @@ export function Sidebar({ elementId, logout }: SidebarProps) {
             <Link to={ROUTES.settings}>
               <FbSidebar.Item as={'span'} icon={WrenchScrewdriverIcon}>
                 Settings
+              </FbSidebar.Item>
+            </Link>
+            <Link to={ROUTES.about}>
+              <FbSidebar.Item as={'span'} icon={InformationCircleIcon}>
+                About
               </FbSidebar.Item>
             </Link>
             {/*<Link to={ROUTES.export}>

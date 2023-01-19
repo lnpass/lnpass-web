@@ -4,7 +4,8 @@ const ROUTES = {
   //export: '/export',
   backup: '/backup',
   settings: '/settings',
-  import: '/import',
+  //import: '/import',
+  about: '/about',
   '*': '/',
 }
 

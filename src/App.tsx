@@ -20,10 +20,12 @@ import { LoginPage } from './LoginPage'
 import { IdentitiesPage } from './IdentitiesPage'
 import { BackupPage } from './BackupPage'
 import { SettingsPage } from './SettingsPage'
+import { AboutPage } from './AboutPage'
 
 import './App.css'
 
 const devMode = process.env.NODE_ENV === 'development' && process.env.REACT_APP_DEV_MODE === 'true'
+const projectVersion = process.env.REACT_APP_VERSION || '0.1.0-dev'
 
 const DEFAULT_SECURE_SETTINGS = {
   autoSyncNostrEnabled: false,
@@ -172,6 +174,15 @@ function App() {
                   <SecureSettingsProvider value={{ lnpassId, defaultValues: DEFAULT_SECURE_SETTINGS }}>
                     <SettingsPage />
                   </SecureSettingsProvider>
+                }
+              />
+              <Route
+                id="about"
+                path={ROUTES.about}
+                element={
+                  <>
+                    <AboutPage version={`v${projectVersion}`} />
+                  </>
                 }
               />
             </>
