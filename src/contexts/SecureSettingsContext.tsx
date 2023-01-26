@@ -70,7 +70,7 @@ const SecureSettingsProvider = ({
       return nip04.encrypt(nostrPrivateKey.hex, nostrPublicKey.hex, JSON.stringify(updatedSettings)).then((encrypted) =>
         settingsDispatch({
           [settingsPropName]: encrypted,
-        } as AppSettings)
+        })
       )
     },
     [decryptedSettings, settingsDispatch, settingsPropName, nostrPrivateKey, nostrPublicKey]

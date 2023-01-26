@@ -209,7 +209,7 @@ export function SettingsPage() {
             <Checkbox
               id="developer-mode-checkbox"
               checked={settings.dev}
-              onChange={() => settingsDispatch({ dev: !settings.dev } as AppSettings)}
+              onChange={() => settingsDispatch({ dev: !settings.dev })}
             />
           </div>
           <div className="flex flex-col">

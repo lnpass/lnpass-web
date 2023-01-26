@@ -9,12 +9,12 @@ export interface AppSettings {
 
 interface AppSettingsEntry {
   settings: AppSettings
-  dispatch: (value: AppSettings) => void
+  dispatch: (value: Partial<AppSettings>) => void
 }
 
 const SettingsContext = createContext<AppSettingsEntry | undefined>(undefined)
 
-const settingsReducer = (oldSettings: AppSettings, action: AppSettings) => {
+const settingsReducer = (oldSettings: AppSettings, action: Partial<AppSettings>) => {
   const { ...newSettings } = action
 
   return {
