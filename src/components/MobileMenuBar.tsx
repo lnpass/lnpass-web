@@ -1,12 +1,13 @@
-import { useCallback, useEffect } from 'react'
+import { ReactNode, useCallback, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import ROUTES from '../routes'
 
 interface MobileMenuBarProps {
   sidebarId: string
+  title: ReactNode
 }
 
-export function MobileMenuBar({ sidebarId }: MobileMenuBarProps) {
+export function MobileMenuBar({ sidebarId, title }: MobileMenuBarProps) {
   const onClickToggleSidebarBtn = useCallback(() => {
     const sidebar = document.getElementById(sidebarId)
     sidebar?.classList.toggle('-translate-x-full')
@@ -49,7 +50,7 @@ export function MobileMenuBar({ sidebarId }: MobileMenuBarProps) {
         </div>
 
         <Link to={{ pathname: ROUTES.home }} className="block p-4 text-white font-bold">
-          lnpass
+          {title}
         </Link>
 
         <button

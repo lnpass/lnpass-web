@@ -1,3 +1,4 @@
+import { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Sidebar as FbSidebar } from 'flowbite-react'
 import {
@@ -11,10 +12,11 @@ import ROUTES from '../routes'
 
 interface SidebarProps {
   elementId: string
+  title: ReactNode
   logout?: () => void
 }
 
-export function Sidebar({ elementId, logout }: SidebarProps) {
+export function Sidebar({ elementId, title, logout }: SidebarProps) {
   return (
     <div
       id={elementId}
@@ -22,7 +24,7 @@ export function Sidebar({ elementId, logout }: SidebarProps) {
     >
       <FbSidebar>
         <FbSidebar.Logo href="#" img="favicon.ico" imgAlt="">
-          lnpass
+          {title}
         </FbSidebar.Logo>
         <FbSidebar.Items>
           <FbSidebar.ItemGroup>

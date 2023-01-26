@@ -6,6 +6,7 @@ import './index.css'
 
 declare global {
   interface AppGlobal {
+    APP_NAME: string
     SETTINGS_STORE_KEY: string
   }
 

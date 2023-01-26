@@ -4,7 +4,7 @@ import { deriveNostrKeys } from '../utils/nostr'
 import { sha256 } from '@noble/hashes/sha256'
 import { bytesToHex } from '@noble/hashes/utils'
 import { nip04 } from 'nostr-tools'
-import { AppSettings, useSettings, useSettingsDispatch } from './SettingsContext'
+import { useSettings, useSettingsDispatch } from './SettingsContext'
 
 const toNostrKeys = (lnpassId: LnpassId) => {
   return deriveNostrKeys(lnpassIdToHDKey(lnpassId))

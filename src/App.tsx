@@ -132,10 +132,11 @@ function App() {
           id="parent"
           element={
             <>
-              <MobileMenuBar sidebarId="sidebar" />
+              <MobileMenuBar sidebarId="sidebar" title={window.APP.APP_NAME} />
               <div className="flex flex-row">
                 <Sidebar
                   elementId="sidebar"
+                  title={window.APP.APP_NAME}
                   logout={() => {
                     setLnpassId(undefined)
                   }}
@@ -181,7 +182,7 @@ function App() {
                 path={ROUTES.about}
                 element={
                   <>
-                    <AboutPage version={`v${projectVersion}`} />
+                    <AboutPage name={window.APP.APP_NAME} version={`v${projectVersion}`} />
                   </>
                 }
               />
