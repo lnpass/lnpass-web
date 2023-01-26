@@ -51,6 +51,11 @@ const DEFAULT_SECURE_SETTINGS = {
         write: enableProdRelays,
       },
       {
+        url: 'wss://nostr.swiss-enigma.ch',
+        read: false,
+        write: enableProdRelays,
+      },
+      {
         url: 'wss://relay.nostr.info',
         read: false,
         write: enableProdRelays,
