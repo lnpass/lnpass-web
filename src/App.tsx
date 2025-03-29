@@ -31,7 +31,7 @@ export const APP = Object.freeze({
   APP_NAME: 'lnpass',
   APP_VERSION: projectVersion,
   SETTINGS_STORE_KEY: 'lnpass-app-settings',
-  DEV_MODE: devMode
+  DEV_MODE: devMode,
 })
 
 const DEFAULT_SECURE_SETTINGS = {

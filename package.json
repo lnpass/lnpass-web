@@ -39,18 +39,18 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^14.4.3",
+    "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^29.2.6",
     "@types/node": "^18.11.19",
     "@types/react": "^18.0.38",
     "@types/react-dom": "^18.0.11",
     "autoprefixer": "^10.4.21",
-    "postcss": "^8.4.49",
+    "postcss": "^8.5.3",
     "prettier": "^2.8.8",
     "typescript": "^4.9.4"
   },
   "dependencies": {
-    "@heroicons/react": "^2.0.18",
+    "@heroicons/react": "^2.2.0",
     "@noble/hashes": "^1.1.5",
     "@scure/bip32": "^1.1.5",
     "bech32": "^2.0.0",

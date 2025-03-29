@@ -47,14 +47,18 @@ export function AccountCard({ account, edit, generateLoginHref, onClickLightning
         <div className="flex gap-2">
           {onClickLightning && (
             <Button gradientDuoTone="tealToLime" outline={true} onClick={() => onClickLightning(account)}>
-              <BoltIcon className="h-6 w-6 mr-3" />
-              Login with Lightning
+              <div className="flex justify-center items-center gap-2">
+                <BoltIcon className="h-6 w-6" />
+                Login with Lightning
+              </div>
             </Button>
           )}
           {onClickNostr && (
             <Button gradientDuoTone="cyanToBlue" outline={true} onClick={() => onClickNostr(account)}>
-              <KeyIcon className="h-6 w-6 mr-3" />
-              Nostr Keys
+              <div className="flex justify-center items-center gap-2">
+                <KeyIcon className="h-6 w-6 mr-3" />
+                Nostr Keys
+              </div>
             </Button>
           )}
         </div>
@@ -62,8 +66,10 @@ export function AccountCard({ account, edit, generateLoginHref, onClickLightning
           <div className="flex gap-2">
             <a href={subLnpassLoginHref} target="_blank" rel="noreferrer">
               <Button size="xs" gradientDuoTone="pinkToOrange" outline={true}>
-                <ArrowTopRightOnSquareIcon className="h-6 w-6 mr-3" />
-                lnpass
+                <div className="flex justify-center items-center gap-2">
+                  <ArrowTopRightOnSquareIcon className="h-6 w-6 mr-3" />
+                  lnpass
+                </div>
               </Button>
             </a>
           </div>
