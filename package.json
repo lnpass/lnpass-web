@@ -12,7 +12,6 @@
     "regtest:clear": "docker-compose --file docker/regtest/docker-compose.yml down --volumes --remove-orphans",
     "regtest:up": "docker-compose --file docker/regtest/docker-compose.yml up",
     "regtest:down": "docker-compose --file docker/regtest/docker-compose.yml down"
-    
   },
   "eslintConfig": {
     "extends": [
@@ -54,11 +53,11 @@
     "@heroicons/react": "^2.0.13",
     "@noble/hashes": "^1.1.5",
     "@scure/bip32": "^1.1.1",
-    "nostr-tools": "^1.1.0",
     "bech32": "^2.0.0",
     "flowbite": "^1.5.5",
     "flowbite-react": "^0.3.7",
     "html5-qrcode": "^2.3.4",
+    "nostr-tools": "^1.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.5.0",
