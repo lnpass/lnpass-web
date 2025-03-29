@@ -27,10 +27,17 @@ import './App.css'
 const devMode = process.env.NODE_ENV === 'development' && process.env.REACT_APP_DEV_MODE === 'true'
 const projectVersion = process.env.REACT_APP_VERSION || '0.1.0-dev'
 
+export const APP = Object.freeze({
+  APP_NAME: 'lnpass',
+  APP_VERSION: projectVersion,
+  SETTINGS_STORE_KEY: 'lnpass-app-settings',
+  DEV_MODE: devMode
+})
+
 const DEFAULT_SECURE_SETTINGS = {
   autoSyncNostrEnabled: false,
   relays: (() => {
-    const developmentRelays = devMode
+    const developmentRelays = APP.DEV_MODE
       ? [
           {
             url: 'ws://localhost:7000',
@@ -45,7 +52,7 @@ const DEFAULT_SECURE_SETTINGS = {
         ]
       : []
 
-    const enableProdRelays = !devMode
+    const enableProdRelays = !APP.DEV_MODE
     const prodRelays = [
       {
         url: 'wss://nostr-pub.wellorder.net',
@@ -132,11 +139,11 @@ function App() {
           id="parent"
           element={
             <>
-              <MobileMenuBar sidebarId="sidebar" title={window.APP.APP_NAME} />
+              <MobileMenuBar sidebarId="sidebar" title={APP.APP_NAME} />
               <div className="flex flex-row">
                 <Sidebar
                   elementId="sidebar"
-                  title={window.APP.APP_NAME}
+                  title={APP.APP_NAME}
                   logout={() => {
                     setLnpassId(undefined)
                   }}
@@ -182,7 +189,7 @@ function App() {
                 path={ROUTES.about}
                 element={
                   <>
-                    <AboutPage name={window.APP.APP_NAME} version={`v${projectVersion}`} />
+                    <AboutPage name={APP.APP_NAME} version={`v${APP.APP_VERSION}`} />
                   </>
                 }
               />

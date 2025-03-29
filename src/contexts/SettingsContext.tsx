@@ -1,6 +1,7 @@
 import { ProviderProps, createContext, useReducer, useEffect, useContext } from 'react'
+import { APP } from '../App'
 
-const localStorageKey = () => window.APP.SETTINGS_STORE_KEY
+const localStorageKey = () => APP.SETTINGS_STORE_KEY
 
 export interface AppSettings {
   dev: boolean
